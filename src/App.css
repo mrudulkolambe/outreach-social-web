@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  background-color: white;
+}
+
+@layer components {
+  .screen {
+    @apply h-screen w-screen bg-white px-8 py-8
+  }
+
+  .btn-primary {
+    @apply py-2 px-5 bg-violet-500 text-white font-semibold rounded-full shadow-md hover:bg-violet-700 focus:outline-none focus:ring focus:ring-violet-400 focus:ring-opacity-75;
+  }
+
+  .primary-heading {
+    @apply text-2xl font-semibold
+  }
+
+  .label {
+    @apply text-sm cursor-pointer
+  }
+
+  .input {
+    @apply bg-white border-2 outline-none px-4 py-3 focus:border-accent duration-150 transition-colors rounded-xl disabled:cursor-not-allowed w-full hover:bg-accent/5 focus:bg-accent/5
+  }
+
+  .text-button {
+    @apply text-accent text-sm font-semibold
+  }
+
+  .button {
+    @apply bg-accent disabled:bg-accent/50 px-5 py-3 rounded-lg text-white font-semibold w-full
+  }
+
+}
+
+.main-height {
+  max-height: calc(100vh - 80px - 155px);
+  height: calc(100vh - 80px - 155px);
+}
+
+.primary-height {
+  max-height: calc(100vh - 80px);
+  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
+}
+
+
+/* Webkit Browsers (Chrome, Safari) */
+.scrollbar {
+  overflow-y: scroll;
+  /* Add scroll if needed */
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 8px;
+  /* Width of the entire scrollbar */
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  /* Color of the scrollbar track */
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #888;
+  /* Color of the scrollbar thumb */
+  border-radius: 6px;
+  /* Roundness of the scrollbar thumb */
+  border: 3px solid #f1f1f1;
+  /* Padding around the scrollbar thumb */
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  /* Color of the scrollbar thumb when hovered */
+}
+
+.storycard-layout {
+  @apply w-[85px] max-w-[85px]
+}
+
+.skeleton {
+  @apply bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300
+}
+
+img {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
