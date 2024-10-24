@@ -1,5 +1,5 @@
-// const baseURL = "https://outreach-backend-development.vercel.app";
-const baseURL = "http://localhost:2000";
+const baseURL = "https://outreach-backend-development.vercel.app";
+// const baseURL = "http://localhost:2000";
 
 // const uploadBaseURL = "http://localhost:8080";
 const uploadBaseURL = "http://15.207.14.199:8080";

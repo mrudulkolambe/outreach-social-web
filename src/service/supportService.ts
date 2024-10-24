@@ -1,6 +1,5 @@
 import { endpoints } from '@/config/endpoints';
 import { postReq } from '@/utils/api';
-import axios from 'axios';
 import { toast } from 'sonner';
 
 async function createSupportRequest(data: any, cb: () => void): Promise<void> {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import RootLayout from '../layout'
 import Topbar from '@/components/Topbar'
 import { getResourceCategories, getResources } from '@/service/resourceService';
@@ -14,7 +14,7 @@ const ResourceHome = () => {
   const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>([]);
   const [resourcePosts, setResourcePosts] = useState<ResourcePostsResponse | null>()
   const [hasMorePost, setHasMorePost] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true)
+  // const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
