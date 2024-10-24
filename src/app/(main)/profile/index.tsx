@@ -12,7 +12,7 @@ import RootLayout from '../layout';
 import { useAuthContext } from '../../../context/Auth';
 
 const Profile = () => {
-  const { user } = useAuthContext()
+  const { user, baseUser } = useAuthContext()
   return (
     <RootLayout>
       <div className='flex flex-col'>
@@ -31,11 +31,11 @@ const Profile = () => {
                   <p className='font-semibold'>Posts</p>
                 </div>
                 <div className='text-xl flex flex-col items-center justify-center'>
-                  <h3 className='font-bold'>12</h3>
+                  <h3 className='font-bold'>{baseUser?.followers || 0}</h3>
                   <p className='font-semibold'>Followers</p>
                 </div>
                 <div className='text-xl flex flex-col items-center justify-center'>
-                  <h3 className='font-bold'>12</h3>
+                  <h3 className='font-bold'>{baseUser?.following || 0}</h3>
                   <p className='font-semibold'>Following</p>
                 </div>
               </div>

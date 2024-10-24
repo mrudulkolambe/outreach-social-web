@@ -11,6 +11,7 @@ interface AuthContextType {
   createAcc: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   user: MainUser | null;
+  baseUser: BaseUser | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,12 +24,14 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [user, setUser] = useState<MainUser | null>(null);
+  const [baseUser, setBaseUser] = useState<BaseUser | null>(null);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (authUser: User | null) => {
       if (authUser) {
         const currentUser = await getUser();
         setUser(currentUser.response); // Setting User object received from backend
+        setBaseUser(currentUser.response); // Setting User object received from backend
         if (['/login', '/signup'].includes(pathname)) {
           navigate('/');
         }
@@ -68,7 +71,7 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, user, createAcc }}>
+    <AuthContext.Provider value={{ login, logout, user, createAcc, baseUser }}>
       {children}
     </AuthContext.Provider>
   );

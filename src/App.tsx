@@ -7,6 +7,8 @@ import Home from './app/(main)/home';
 import SignUp from './app/signup';
 import ForumHome from './app/(main)/forum/Home';
 import Forum from './app/(main)/forum/Forum';
+import ResourceHome from './app/(main)/resources';
+import HelpAndSupport from './app/(main)/help-and-support';
 
 function App() {
 
@@ -29,6 +31,13 @@ function App() {
           {/* FORUM */}
           <Route path="/forum" element={<ForumHome />} />
           <Route path="/forum/:_id" element={<Forum />} />
+
+          {/* RESOURCE */}
+          <Route path="/resource" element={<ResourceHome />} />
+          <Route path="/forum/:_id" element={<Forum />} />
+
+          
+          <Route path="/help-and-support" element={<HelpAndSupport />} />
         </Route>
       </Routes>
     </>

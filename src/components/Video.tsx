@@ -35,7 +35,7 @@ const VideoComponent = ({ videoUrl, isPopup }: { videoUrl: string, isPopup: bool
 	}, [isVideoInView]);
 
 	const videoJsOptions = {
-		autoplay: false,
+		autoplay: true,
 		controls: false,
 		responsive: true,
 		fluid: true,

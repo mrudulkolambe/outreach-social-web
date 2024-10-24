@@ -8,6 +8,15 @@ import { useFeedContext } from "../context/Feed";
 import { useAuthContext } from "../context/Auth";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/settings-dropdown"
+
 
 
 const Sidebar = ({
@@ -47,13 +56,16 @@ const Sidebar = ({
       icon: <BiBook className='text-2xl' />,
       label: "Resource"
     },
-    {
-      action: "link",
-      url: "/settings",
-      icon: <BiCog className='text-2xl' />,
-      label: "Settings"
-    },
   ]
+
+  const settingsDropdown = {
+    action: "dropdown",
+    url: "/settings",
+    icon: <BiCog className='text-2xl' />,
+    label: "Settings",
+    open: false
+  }
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +114,7 @@ const Sidebar = ({
     <>
       <aside className='w-[20vw] h-screen'>
         <div className='flex items-center px-9 h-[80px] w-full'>
-          <img src={"/assets/logo/logo.svg"} alt="" />
+          <Link to={"/"}><img src={"/assets/logo/logo.svg"} alt="" /></Link>
         </div>
         <nav className='primary-height px-5 py-5 gap-2 flex flex-col border-t border-r justify-between'>
           {
@@ -111,11 +123,19 @@ const Sidebar = ({
                 routes.map((route) => {
                   if (route.action == "link") {
                     return <Link key={route.url} className={twMerge('text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg', pathname == route.url ? "text-accent bg-accent/10" : "text-gray-500 ")} to={route.url}>{route.icon} {route.label}</Link>
-                  } else {
+                  } else if (route.action === "button") {
                     return <span key={route.url} className={twMerge('cursor-pointer text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg', pathname == route.url ? "text-accent bg-accent/10" : "text-gray-500 ")} onClick={() => setPostDialog(true)}>{route.icon} {route.label}</span>
                   }
                 })
               }
+              <DropdownMenu open={settingsOpen} onOpenChange={(e) => setSettingsOpen(e)}>
+                <DropdownMenuTrigger className="w-full"><span key={settingsDropdown.url} className={twMerge('w-full cursor-pointer text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg')}>{settingsDropdown.icon} {settingsDropdown.label}</span></DropdownMenuTrigger>
+                <DropdownMenuContent className="mt-0 p-0 border-none w-[--radix-popper-anchor-width] shadow-none">
+                  <DropdownMenuItem className="w-full">Terms & Conditions</DropdownMenuItem>
+                  <DropdownMenuItem className="w-full">Privacy Policy</DropdownMenuItem>
+                  <DropdownMenuItem className="w-full"><Link to={"/help-and-support"}>Help & Support</Link></DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           }
           <span key={'logout'} className={twMerge('cursor-pointer text-red-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg ')} onClick={() => {
@@ -157,6 +177,7 @@ const Sidebar = ({
               const status = await handlePost(selectedFiles, content, isPublic);
               if (status == 200) {
                 setSelectedFiles([]);
+                setContent("")
               }
             }} type="button" className="flex items-center justify-center text-white text-sm bg-accent px-6 py-2 rounded-lg">Post</button>
           </div>

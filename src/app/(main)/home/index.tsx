@@ -9,16 +9,22 @@ import Storycard from "../../../components/Storycard"
 import { useAuthContext } from "../../../context/Auth"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { useForumContext } from "../../../context/Forum"
+import { useEffect, useState } from "react"
 
 const Home = () => {
 	const { posts, uploading, uploadProgress, loadMorePosts, hasMorePost } = useFeedContext()
 	const { forums } = useForumContext()
 	const { user } = useAuthContext()
+	const [loading, setLoading] = useState(true)
 
-
+	useEffect(() => {
+		setTimeout(() => {
+			setLoading(false)
+		}, 4000);
+	}, [])
 
 	return (
-		<RootLayout>
+		<RootLayout loading={loading}>
 			<div className='flex flex-col'>
 				<div className='border-b h-[80px] w-full flex items-center justify-end px-9'>
 					<Link to={"/profile"}><img className='h-[30px] w-[30px] rounded-full object-cover' src={user?.imageUrl} alt="" /></Link>

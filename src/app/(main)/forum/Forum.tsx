@@ -16,8 +16,22 @@ const Forum = () => {
 	const [forum, setForum] = useState<ForumResponse | null>()
 	const [forumPosts, setForumPosts] = useState<ForumPostsResponse | null>()
 	const [hasMorePost, setHasMorePost] = useState<boolean>(false);
-	// const [currentPage, setCurrentPage] = useState<number>(1);
+	const [loading, setLoading] = useState(true)
+	const [currentPage, setCurrentPage] = useState<number>(1);
+	const loadMorePosts = async () => {
+		if (hasMorePost) {
+			const nextPage = currentPage + 1;
+			const morePostsResponse = await getForumPosts(_id as string, nextPage);
 
+			if (morePostsResponse) {
+				setForumPosts({ ...morePostsResponse, response: forumPosts?.response!.concat(morePostsResponse.response!) ?? [] })
+				setCurrentPage(nextPage);
+				setHasMorePost(morePostsResponse.totalPages > morePostsResponse.currentPage);
+			}
+		} else {
+			console.log("Else Load More Posts");
+		}
+	};
 
 	const fetchForum = async () => {
 		setForum(await getForum(_id as string));
@@ -26,6 +40,7 @@ const Forum = () => {
 		console.log(posts.currentPage < posts.totalPages)
 		setHasMorePost(posts.currentPage < posts.totalPages)
 		setForumPosts(posts);
+		setLoading(false)
 	}
 
 	useEffect(() => {
@@ -35,7 +50,7 @@ const Forum = () => {
 
 	return (
 		<>
-			<RootLayout sidebar={<JoinedForumSidebar />}>
+			<RootLayout loading={loading} sidebar={<JoinedForumSidebar />}>
 				<div className='flex flex-col h-screen max-h-screen'>
 					<Topbar />
 					<div className='flex flex-col items-start py-3 px-10 w-full bg-accent/5 primary-height overflow-auto scrollbar'>
@@ -79,9 +94,9 @@ const Forum = () => {
 							forum?.response?.joined.includes(user?._id as string) && <div className='h-56 mt-4 grid grid-cols-12 w-full'>
 								<div className='col-span-8'>
 									<InfiniteScroll
-										dataLength={10}
+										dataLength={forumPosts?.response?.length!}
 										next={() => {
-											// loadMorePosts()
+											loadMorePosts()
 										}}
 										hasMore={hasMorePost}
 										loader={<h4>Loading...</h4>}
@@ -94,7 +109,7 @@ const Forum = () => {
 									>
 										{
 											forumPosts?.response?.map((forumPost: ForumPost) => {
-												return <ForumPostCard post={forumPost}/>
+												return <ForumPostCard post={forumPost} />
 											})
 										}
 									</InfiniteScroll>

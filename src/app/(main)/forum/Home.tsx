@@ -5,7 +5,7 @@ import { useForumContext } from '@/context/Forum'
 import { useAuthContext } from '@/context/Auth'
 import { Link } from 'react-router-dom'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/forum_dialog'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import interestsOptions from '@/lib/interests'
 import { SearchableDropdown } from '@/components/ui/searchable_dropdown'
 import { createForum } from '@/service/forumService'
@@ -15,13 +15,23 @@ const ForumHome = () => {
 	const { forums } = useForumContext()
 	const { user } = useAuthContext()
 	const [isPublic, setIsPublic] = useState(true)
-	const [loading, setLoading] = useState(false)
+	const [loading, setLoading] = useState(true)
 	const [name, setName] = useState("")
 	const [desc, setDesc] = useState("")
 	const [category, setCategory] = useState<string>(interestsOptions[0].interest)
+	const [createForumLoading, setCreateForumLoading] = useState(false)
+
+
+	useEffect(() => {
+
+		setTimeout(() => {
+			setLoading(false)
+		}, 4000);
+	}, [])
+
 
 	const handleCreateForum = async () => {
-		setLoading(true)
+		setCreateForumLoading(true)
 		const obj = {
 			'public': isPublic,
 			'name': name,
@@ -30,21 +40,21 @@ const ForumHome = () => {
 			'image': "https://outreachapps3bucket.s3.ap-south-1.amazonaws.com/forum/NKQP9Cv7uCRyJTpu4uUDio4oy2l2/c0e38ce9-55d8-4985-b7d2-ee6abb15cb08-Internet_20240704_101545_6.jpeg"
 		}
 		await createForum(obj)
-		setLoading(false)
+		setCreateForumLoading(false)
 	}
 	return (
-		<RootLayout>
+		<RootLayout loading={loading}>
 			<div className='flex flex-col h-screen max-h-screen'>
 				<Topbar />
 				<div className='flex flex-col items-start py-3 px-10 w-full bg-accent/5 primary-height overflow-hidden'>
 					<div className='w-full grid grid-cols-12 gap-x-6 flex-1'>
-						<div className='col-span-8 flex flex-col'>
-							<h2 className='text-2xl font-bold mb-5'>Explore new forum</h2>
-							<div className='gap-x-3 w-full grid grid-cols-2 overflow-auto max-h-[83vh] scrollbar'>
+						<div className='col-span-9 flex flex-col'>
+							<h2 className='page-heading mb-5'>Explore new forum</h2>
+							<div className='gap-x-3 w-full grid grid-cols-2 overflow-auto max-h-[83vh] scrollbar pb-3'>
 								{
 									forums.filter((forum: Forum) => !forum.joined.includes(user?._id as string) && forum.userId._id != user?._id).map((forum: Forum) => {
 										return (
-											<div key={forum._id} className='h-max p-3 bg-white rounded-lg mb-3'>
+											<div key={forum._id} className='h-max p-3 bg-white rounded-lg mb-3 shadow-lg'>
 												<Link to={`/forum/${forum._id}`}><img src={forum.image} className='h-48 w-full object-cover rounded-md' alt={forum.name} /></Link>
 												<h3 className='text-lg font-semibold mt-2'>{forum.name}</h3>
 												<div className='flex items-center justify-between'>
@@ -71,7 +81,7 @@ const ForumHome = () => {
 								}
 							</div>
 						</div>
-						<div className='flex-1 flex flex-col col-span-4 items-end'>
+						<div className='flex-1 flex flex-col col-span-3 items-end'>
 							<Dialog>
 								<DialogTrigger asChild>
 									<button className={twMerge('button w-max h-max', "py-2")}>New Forum</button>
@@ -100,11 +110,11 @@ const ForumHome = () => {
 											<label htmlFor='desc'>Description: </label>
 											<textarea onChange={(e) => setDesc(e.target.value)} value={desc} name="" id="desc" className='input h-32 resize-none'></textarea>
 										</div>
-										<button onClick={handleCreateForum} className='button py-3 mt-3 h-max'>{loading ? <Spinner /> : "Create"}</button>
+										<button onClick={handleCreateForum} className='button py-3 mt-3 h-max'>{createForumLoading ? <Spinner /> : "Create"}</button>
 									</div>
 								</DialogContent>
 							</Dialog>
-							<div className='px-5 w-full mt-3 flex flex-col flex-1 max-h-[83vh] bg-white overflow-auto scrollbar gap-3 py-3 rounded-lg'>
+							<div className='shadow-lg px-5 w-full mt-3 flex flex-col flex-1 max-h-[83vh] bg-white overflow-auto scrollbar gap-3 py-3 rounded-lg'>
 								<h3 className='text-xl font-bold mb-1'>List of joined forums</h3>
 								{
 									forums.filter((forum: Forum) => forum.joined.includes(user?._id as string) || forum.userId._id === user?._id).map((forum: Forum) => {

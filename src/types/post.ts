@@ -6,6 +6,13 @@ type MainUser = {
     bio: string
 }
 
+type BaseUser = MainUser & {
+    followers: number;
+    following: number;
+    interest: string[];
+    feeds: Post[];
+};
+
 type Media = {
     url: string;
     type: string;

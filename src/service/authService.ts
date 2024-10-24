@@ -4,7 +4,7 @@ import { getReq } from "../utils/api";
 interface ApiResponse {
   success: boolean;
   message: string;
-  response: MainUser | null;
+  response: any | null;
 }
 
 export const getUser = async (): Promise<ApiResponse> => {
