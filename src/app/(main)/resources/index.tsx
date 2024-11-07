@@ -61,7 +61,7 @@ const ResourceHome = () => {
                 })
               }
             </div>
-            <div className='w-full flex flex-col h-[60vh] overflow-auto'>
+            <div className='w-full flex flex-col h-[80vh] overflow-auto scrollbar'>
               <InfiniteScroll
                 dataLength={resourcePosts?.response?.length || 0}
                 next={() => {
