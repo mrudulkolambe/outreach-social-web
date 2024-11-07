@@ -3,7 +3,7 @@ import 'swiper/css';
 import { Navigation, Pagination } from 'swiper/modules';
 import VideoComponent from "../Video";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { memo, ReactElement, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { GoHeart, GoComment, GoHeartFill } from "react-icons/go";
 import { getComments, likePost, postComments } from '../../service/postService';
@@ -19,7 +19,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 	const [comments, setComments] = useState<FeedCommentsResponse | null>(null)
 	const [tempComments, setTempComments] = useState<FeedCommentsResponse | null>(null)
 	const [commentsLoading, setCommentsLoading] = useState(true)
-	const [postCommentLoading,  setPostCommentLoading] = useState(false)
+	const [postCommentLoading, setPostCommentLoading] = useState(false)
 	const [liked, setLiked] = useState({
 		liked: post.liked,
 		likeCount: post.likesCount
@@ -65,7 +65,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 			oldCommentArray?.push(comment.response);
 			setTempComments(oldComments as FeedCommentsResponse);
 			setCommentText("")
-		}else{
+		} else {
 			toast.error("Couldn't post the comment.")
 		}
 		setPostCommentLoading(false)
@@ -74,7 +74,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 	useEffect(() => {
 		if (tempComments) {
 			const sortedCommentsResponse = tempComments.response.sort((a, b) => b.createdAt - a.createdAt);
-			setComments({...tempComments, response: sortedCommentsResponse});
+			setComments({ ...tempComments, response: sortedCommentsResponse });
 		}
 	}, [tempComments])
 
@@ -172,10 +172,14 @@ const Postcard = memo(({ post }: { post: Post }) => {
 						</div>
 					</div>
 					<div className='px-4 py-3 flex-1 w-full gap-y-4 flex-col flex overflow-auto scrollbar'>
-						<ContentDisplay user={post.user} text={post.content} timestamp={post.createdAt} />
+						<ContentDisplay user={post.user} text={post.content} timestamp={post.createdAt} comments={[]} />
 						{
-							commentsLoading ? <p className='text-sm'>Loading...</p> : comments?.response.map((comment: FeedComment) => {
-								return <ContentDisplay text={comment.text} timestamp={comment.createdAt} user={comment.author} />
+							commentsLoading ? <p className='text-sm'>Loading...</p> : comments?.response?.filter((comment: FeedComment) => {
+								return comment.parentID == null || comment.parentID == undefined || comment.parentID == ""
+							}).map((comment: FeedComment) => {
+								return <ContentDisplay text={comment.text} timestamp={comment.createdAt} user={comment.author} comments={comments.response.filter((nestedComment) => {
+									return nestedComment.parentID === comment._id;
+								})} />
 							})
 						}
 					</div>
@@ -197,7 +201,18 @@ const Postcard = memo(({ post }: { post: Post }) => {
 
 export default Postcard
 
-const ContentDisplay = ({ user, text, timestamp }: { user: MainUser, text: string, timestamp: string | number }) => {
+const ContentDisplay = ({ user, text, timestamp, comments }: { user: MainUser, text: string, timestamp: string | number, comments: FeedComment[] }) => {
+	let feedComments = comments.map((comment) => {
+		return <DisplayComment user={comment.author} text={comment.text} timestamp={comment.createdAt} comments={null} />
+	})
+	console.log("COMMENT", feedComments)
+	return <div className='flex flex-col'>
+		<DisplayComment text={text} timestamp={timestamp} user={user} comments={feedComments} />
+	</div>
+}
+
+const DisplayComment = ({ user, text, timestamp, comments }: { user: MainUser, text: string, timestamp: string | number, comments: ReactElement[] | null }) => {
+	const [show, setShow] = useState(false)
 	return <div className='w-full flex gap-3 items-start'>
 		<img src={user.imageUrl} className='h-10 w-10 rounded-full' alt="" />
 		<div className='flex flex-col'>
@@ -205,7 +220,13 @@ const ContentDisplay = ({ user, text, timestamp }: { user: MainUser, text: strin
 				<b className='inline-flex mr-1 font-extrabold '>@{user.username}</b>
 				<p className='whitespace-pre-line flex-1 inline-flex font-medium' dangerouslySetInnerHTML={{ __html: text }}></p>
 			</div>
-			<p className='text-xs font-semibold mt-2'>{moment(timestamp).fromNow()}</p>
+			<div className='flex gap-x-3'>
+				<p className='text-xs font-semibold mt-2'>{moment(timestamp).fromNow()}</p>
+				{comments?.length != 0 && <p onClick={() => setShow(!show)} className='text-xs font-semibold mt-2 cursor-pointer'>{show ? "Hide Comments" : "Show Comments"}</p>}
+			</div>
+			{show && <div className='flex flex-col gap-3 mt-3'>
+				{comments}
+			</div>}
 		</div>
 	</div>
 }

@@ -34,7 +34,6 @@ function App() {
 
           {/* RESOURCE */}
           <Route path="/resource" element={<ResourceHome />} />
-          <Route path="/forum/:_id" element={<Forum />} />
 
           
           <Route path="/help-and-support" element={<HelpAndSupport />} />

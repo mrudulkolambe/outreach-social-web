@@ -6,7 +6,6 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { Link } from 'react-router-dom';
 import Button from '../../../components/Button';
-import Storycard from '../../../components/Storycard';
 import PostCard from '../../../components/PostCard';
 import RootLayout from '../layout';
 import { useAuthContext } from '../../../context/Auth';
@@ -71,7 +70,7 @@ const Profile = () => {
                       <p>Your story</p>
                     </div>
                   </SwiperSlide>
-                  <SwiperSlide className='storycard-layout'>
+                  {/* <SwiperSlide className='storycard-layout'>
                     <Storycard />
                   </SwiperSlide>
                   <SwiperSlide className='storycard-layout'>
@@ -109,7 +108,7 @@ const Profile = () => {
                   </SwiperSlide>
                   <SwiperSlide className='storycard-layout'>
                     <Storycard />
-                  </SwiperSlide>
+                  </SwiperSlide> */}
                 </Swiper>
               </div>
             </div>

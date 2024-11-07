@@ -29,11 +29,14 @@ export const endpoints = {
     'get-feed-comments': `${baseURL}/feed-comment`,
     'create-forum-feed-comment': `${baseURL}/forum-feed-comment`,
     'get-forum-feed-comments': `${baseURL}/forum-feed-comment`,
-    
+
     // RESOURCE
     'get-resource-categories': `${baseURL}/resource-category/get`,
     'get-resources': `${baseURL}/resource/get`,
-    
+
+    // STORY
+    'create-story': `${baseURL}/story/create`,
+    'get-story': `${baseURL}/story/get`,
 
     'single-file-upload': `${uploadBaseURL}/upload`,
     'multi-file-upload': `${uploadBaseURL}/multi-upload`,

@@ -10,12 +10,56 @@ import { useAuthContext } from "../../../context/Auth"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { useForumContext } from "../../../context/Forum"
 import { useEffect, useState } from "react"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import Stories from 'react-insta-stories';
+import { getUserStories } from "@/service/storyService"
+import moment from "moment"
 
 const Home = () => {
 	const { posts, uploading, uploadProgress, loadMorePosts, hasMorePost } = useFeedContext()
 	const { forums } = useForumContext()
 	const { user } = useAuthContext()
 	const [loading, setLoading] = useState(true)
+	const [stories, setStories] = useState<StoryResponse>({ own: [], user: [] });
+	let emptyStories: any[] = []
+	const [storyOpen, setStoryOpen] = useState({
+		show: false,
+		stories: emptyStories
+	})
+
+
+	function handleStories(stories: UserStory[]): UserStoryGroup[] {
+		const groupedMap: Record<string, UserStoryGroup> = {};
+
+		for (const story of stories) {
+			const username = story.userId.username;
+			const imageUrl = story.userId.imageUrl;
+			if (!groupedMap.hasOwnProperty(username)) {
+				groupedMap[username] = {
+					username: username,
+					stories: [],
+					imageUrl: imageUrl
+				};
+			}
+			groupedMap[username].stories.push(story);
+		}
+
+		return Object.values(groupedMap);
+	}
+
+	useEffect(() => {
+		if (user) {
+			initStories()
+		}
+	}, [user])
+
+	const initStories = async () => {
+		let stories = await getUserStories();
+		console.log("STORIES", stories)
+		if (stories) {
+			setStories(stories.response)
+		}
+	}
 
 	useEffect(() => {
 		setTimeout(() => {
@@ -23,21 +67,63 @@ const Home = () => {
 		}, 4000);
 	}, [])
 
+	useEffect(() => {
+		if (!storyOpen.show) {
+			// Reset stories to empty once the dialog is fully closed
+			const timer = setTimeout(() => setStoryOpen({ show: false, stories: [] }), 300);
+			return () => clearTimeout(timer);
+		}
+	}, [storyOpen.show, setStoryOpen]);
+
 	return (
 		<RootLayout loading={loading}>
+			<Dialog open={storyOpen.show}>
+				<DialogContent>
+					<Stories
+						storyContainerStyles={{
+							background: "#000",
+						}}
+						storyInnerContainerStyles={{
+							background: "#000",
+						}}
+						keyboardNavigation={true}
+						onAllStoriesEnd={() => {
+							console.log("All stories ended");
+							setStoryOpen(prev => ({ ...prev, show: false }));
+						}}
+						stories={storyOpen.stories || []}
+						defaultInterval={8000}
+						width={"100%"}
+						height={768}
+					/>
+				</DialogContent>
+			</Dialog>
 			<div className='flex flex-col'>
 				<div className='border-b h-[80px] w-full flex items-center justify-end px-9'>
 					<Link to={"/profile"}><img className='h-[30px] w-[30px] rounded-full object-cover' src={user?.imageUrl} alt="" /></Link>
 				</div>
 				<div className='flex items-center py-3 px-10 w-full h-[155px]'>
 					<Swiper
-						freeMode={true}
 						className='w-full'
 						grabCursor
 						spaceBetween={20}
 					>
 						<SwiperSlide className='storycard-layout'>
-							<div className='flex flex-col gap-2 items-center'>
+							<div onClick={() => {
+								setStoryOpen({
+									show: true, stories: stories.own.map((story) => {
+										return {
+											type: story.media.type,
+											url: story.media.url,
+											header: {
+												heading: story.userId.name,
+												subheading: moment(story.createdAt).fromNow(),
+												profileImage: story.userId.imageUrl,
+											},
+										}
+									})
+								})
+							}} className='flex flex-col gap-2 items-center'>
 								<div className='flex flex-col h-[100px] w-[85px] bg-accent/20 rounded-lg items-center justify-center px-2 py-3 gap-3'>
 									<span className='h-6 w-6 p-0.5 bg-accent rounded-full flex items-center justify-center text-white'>
 										<Plus />
@@ -47,45 +133,31 @@ const Home = () => {
 								<p>Your story</p>
 							</div>
 						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
+						{
+							handleStories(stories.user).map((userStory) => {
+								return <SwiperSlide onClick={() => {
+									setStoryOpen({
+										show: true,
+										stories: userStory.stories.map((story) => {
+											return {
+												type: story.media.type,
+												url: story.media.url,
+												header: {
+													heading: story.userId.name,
+													subheading: moment(story.createdAt).fromNow(),
+													profileImage: story.userId.imageUrl,
+												},
+											}
+										})
+									})
+								}} className='storycard-layout' key={userStory.username}>
+									<Storycard userStoryGrp={userStory} />
+								</SwiperSlide>
+							})
+						}
+						{/* <SwiperSlide className='storycard-layout'>
 							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
-						<SwiperSlide className='storycard-layout'>
-							<Storycard />
-						</SwiperSlide>
+						</SwiperSlide> */}
 					</Swiper>
 				</div>
 				<div className='flex '>
@@ -133,7 +205,7 @@ const Home = () => {
 					</div>
 				</div>
 			</div>
-		</RootLayout>
+		</RootLayout >
 	)
 }
 
