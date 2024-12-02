@@ -30,7 +30,6 @@ const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 		await likePost(post);
 	}
 	const [commentText, setCommentText] = useState("")
-	const [showMore, setShowMore] = useState(false)
 	const [comments, setComments] = useState<ForumFeedCommentsResponse | null>(null)
 	const [tempComments, setTempComments] = useState<ForumFeedCommentsResponse | null>(null)
 	const [commentsLoading, setCommentsLoading] = useState(true)

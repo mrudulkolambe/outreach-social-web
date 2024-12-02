@@ -117,6 +117,7 @@ const Sidebar = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
+    setHashTags(interestsOptions.map((interest) => interest.tag))
     const handleCursorTracking = () => {
       const inputRect = inputRef.current?.getBoundingClientRect();
       if (inputRect) {

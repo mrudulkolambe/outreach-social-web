@@ -15,7 +15,6 @@ const Forum = () => {
 	const { user } = useAuthContext();
 	const [forum, setForum] = useState<ForumResponse | null>()
 	const [forumPosts, setForumPosts] = useState<ForumPostsResponse | null>()
-	const [tempPosts, setTempPosts] = useState<ForumPostsResponse | null>()
 	const [hasMorePost, setHasMorePost] = useState<boolean>(false);
 	const [loading, setLoading] = useState(true)
 	const [currentPage, setCurrentPage] = useState<number>(1);
