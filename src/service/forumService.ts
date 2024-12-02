@@ -119,3 +119,39 @@ export const getForumPosts = async (_id: string, currentPage: number): Promise<F
     };
   }
 }
+
+
+export const likePost = async (post: ForumPost) => {
+  try {
+    const response = await patchReq(`${endpoints['like-forum-feed']}/${post._id}`, {});
+    if (response) {
+      return 200;
+    } else {
+      throw new Error('Failed to update post');
+    }
+  } catch (error) {
+    return 500;
+  }
+}
+
+export const getComments = async (post: ForumPost): Promise<ForumFeedCommentsResponse | null> => {
+  const response = await getReq(`${endpoints["get-forum-feed-comments"]}/${post._id}`)
+  if (response.ok) {
+    const data = await response.json();
+    console.log("DATA", data)
+    return data
+  } else {
+    return null
+  }
+}
+
+export const postComments = async (postID: string, text: string): Promise<ForumFeedCommentResponse | null> => {
+  const body = { 'text': text, 'parentID': null };
+  const response = await postReq(`${endpoints["create-forum-feed-comment"]}/${postID}`, body)
+  if (response.ok) {
+    const data = await response.json();
+    return data as FeedCommentResponse;
+  } else {
+    return null
+  }
+}

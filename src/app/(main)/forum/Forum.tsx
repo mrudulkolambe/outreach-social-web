@@ -15,14 +15,15 @@ const Forum = () => {
 	const { user } = useAuthContext();
 	const [forum, setForum] = useState<ForumResponse | null>()
 	const [forumPosts, setForumPosts] = useState<ForumPostsResponse | null>()
+	const [tempPosts, setTempPosts] = useState<ForumPostsResponse | null>()
 	const [hasMorePost, setHasMorePost] = useState<boolean>(false);
 	const [loading, setLoading] = useState(true)
 	const [currentPage, setCurrentPage] = useState<number>(1);
+
 	const loadMorePosts = async () => {
 		if (hasMorePost) {
 			const nextPage = currentPage + 1;
 			const morePostsResponse = await getForumPosts(_id as string, nextPage);
-
 			if (morePostsResponse) {
 				setForumPosts({ ...morePostsResponse, response: forumPosts?.response!.concat(morePostsResponse.response!) ?? [] })
 				setCurrentPage(nextPage);
@@ -94,7 +95,7 @@ const Forum = () => {
 							forum?.response?.joined.includes(user?._id as string) && <div className='h-56 mt-4 grid grid-cols-12 w-full'>
 								<div className='col-span-8'>
 									<InfiniteScroll
-										dataLength={forumPosts?.response?.length!}
+										dataLength={forumPosts?.response?.length! || 0}
 										next={() => {
 											loadMorePosts()
 										}}
@@ -109,7 +110,7 @@ const Forum = () => {
 									>
 										{
 											forumPosts?.response?.map((forumPost: ForumPost) => {
-												return <ForumPostCard post={forumPost} />
+												return <ForumPostCard forumPost={forumPost} />
 											})
 										}
 									</InfiniteScroll>

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../ui/post_di
 import moment from 'moment';
 import { FaArrowUp } from "react-icons/fa6";
 import { toast } from 'sonner';
+import HighlighHashtags from '../HighlighHashtags';
 
 const Postcard = memo(({ post }: { post: Post }) => {
 	const { updatePost } = useFeedContext();
@@ -25,7 +26,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 		likeCount: post.likesCount
 	})
 	const [commentText, setCommentText] = useState("")
-
+	const [showMore, setShowMore] = useState(false)
 	const handleLike = async () => {
 		let tempPost: Post = {
 			_id: post._id,
@@ -123,7 +124,8 @@ const Postcard = memo(({ post }: { post: Post }) => {
 					{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 right-1 -translate-y-1/2 p-0.5 cursor-pointer", `next_${post._id}`)}><ChevronRight /></span>}
 				</div>
 				<div className='mt-3 flex flex-col gap-3 border-b pb-4'>
-					<p className='text-lg' dangerouslySetInnerHTML={{ __html: post.content }}></p>
+					<p className='text-lg whitespace-pre-wrap' >{post.content.length > 100 && showMore ? <HighlighHashtags text={post.content} /> : `${post.content.slice(0, 100)}...`}</p>
+					{post.content.length > 100 && <p className='text-accent cursor-pointer' onClick={() => setShowMore(!showMore)}>{showMore ? "Show less" : "Show More"}</p>}
 					<div className='flex gap-3' key={`${post._id} ${liked.liked} ${liked.likeCount}`}>
 						<span className='flex gap-1 items-center text-lg'>{liked.liked ? <GoHeartFill onClick={handleLike} className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart onClick={handleLike} className='text-gray-500 text-2xl' />} {liked.likeCount}</span>
 						<DialogTrigger>
@@ -218,7 +220,7 @@ const DisplayComment = ({ user, text, timestamp, comments }: { user: MainUser, t
 		<div className='flex flex-col'>
 			<div className='inline-block text-sm'>
 				<b className='inline-flex mr-1 font-extrabold '>@{user.username}</b>
-				<p className='whitespace-pre-line flex-1 inline-flex font-medium' dangerouslySetInnerHTML={{ __html: text }}></p>
+				<p className='whitespace-pre-wrap flex-1 inline-flex font-medium' dangerouslySetInnerHTML={{ __html: text }}></p>
 			</div>
 			<div className='flex gap-x-3'>
 				<p className='text-xs font-semibold mt-2'>{moment(timestamp).fromNow()}</p>

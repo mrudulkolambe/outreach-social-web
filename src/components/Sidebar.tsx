@@ -2,7 +2,7 @@ import { BiCog, BiHomeAlt2, BiGroup, BiPlus, BiBook } from "react-icons/bi";
 import { twMerge } from 'tailwind-merge';
 import { IoClose } from "react-icons/io5";
 import { Link, useLocation } from 'react-router-dom';
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { File } from "lucide-react";
 import { useFeedContext } from "../context/Feed";
 import { useAuthContext } from "../context/Auth";
@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/settings-dropdown"
+import interestsOptions from "@/lib/interests";
 
 
 
@@ -24,6 +25,7 @@ const Sidebar = ({
 }>) => {
   const { pathname } = useLocation()
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const [postDialog, setPostDialog] = useState(false)
   const [isPublic, setIsPublic] = useState(true)
   const [content, setContent] = useState("")
@@ -87,6 +89,9 @@ const Sidebar = ({
     return 'unknown';
   };
 
+  const [hashTags, setHashTags] = useState(interestsOptions.map((interest) => interest.tag));
+  const [filteredTags, setFilteredTags] = useState(hashTags);
+
   const removeFile = (index: number) => {
     setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
@@ -106,6 +111,52 @@ const Sidebar = ({
         )}
       </div>
     });
+  };
+
+  const [cursorY, setCursorY] = useState(20); // Y-position of the cursor
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => {
+    const handleCursorTracking = () => {
+      const inputRect = inputRef.current?.getBoundingClientRect();
+      if (inputRect) {
+        setCursorY(inputRect.top + inputRect.height); // Position below the input field
+      }
+    };
+
+    window.addEventListener("resize", handleCursorTracking);
+    window.addEventListener("scroll", handleCursorTracking);
+
+    return () => {
+      window.removeEventListener("resize", handleCursorTracking);
+      window.removeEventListener("scroll", handleCursorTracking);
+    };
+  }, []);
+
+  const handleInputChange = (content: string) => {
+    setContent(content);
+
+    const hashIndex = content.lastIndexOf("#");
+
+    if (hashIndex !== -1) {
+      const searchText = content.substring(hashIndex + 1);
+      const filtered = hashTags.filter((tag) =>
+        tag.toLowerCase().startsWith(searchText.toLowerCase())
+      );
+      setFilteredTags(filtered);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+
+  const handleTagSelection = (tag: string) => {
+    const lastHashIndex = content.lastIndexOf("#");
+    const newText =
+      content.substring(0, lastHashIndex) + `#${tag} `; // Replace text after the last #
+    setContent(newText);
+    setShowSuggestions(false);
   };
 
   return (
@@ -166,7 +217,29 @@ const Sidebar = ({
             </div>
           </div>
 
-          <textarea value={content} onChange={(e) => setContent(e.currentTarget.value)} className="bg-accent/5 px-4 py-2 rounded-lg resize-none scrollbar outline-none border-0 flex-1 mt-3 w-full h-48" placeholder="What's on your mind?"></textarea>
+          <div className="relative h-[55%]">
+            <textarea value={content} ref={textAreaRef} onChange={(e) => handleInputChange(e.target.value)} className="bg-accent/5 px-4 py-2 rounded-lg resize-none scrollbar outline-none border-0 flex-1 mt-3 w-full h-full" placeholder="What's on your mind?"></textarea>
+            {showSuggestions && (
+              <div
+                className="absolute left-0 right-0 z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg"
+                style={{
+                  top: `${cursorY}px`, // Dynamic positioning below the cursor
+                }}
+              >
+                <div className="max-h-48 overflow-auto flex flex-col-reverse">
+                  {filteredTags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                      onClick={() => handleTagSelection(tag)}
+                    >
+                      #{tag}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="h-24 result flex gap-2 flex-wrap">{renderPreviews(selectedFiles)}</div>
           <div className="items-center flex justify-between">
             <button onClick={() => inputRef.current?.click()} type="button" className="flex items-center justify-center text-accent text-sm bg-accent/10 px-3 py-1 rounded-lg"><File className="h-3 w-3" />&nbsp; Upload Photos/Videos</button>

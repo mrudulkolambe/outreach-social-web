@@ -65,5 +65,5 @@ type FeedComment = {
     parentID?: string;
     postID: string;
     text: string;
-    _id: string
+    _id: string;
 }

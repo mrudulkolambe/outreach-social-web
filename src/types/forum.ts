@@ -20,4 +20,29 @@ interface ForumPost {
     likesCount: number;
     commentCount: number;
     liked: boolean;
+    createdAt: number
+}
+
+
+type ForumFeedCommentsResponse = {
+    success: boolean;
+    message: string;
+    response: {
+        comments: ForumFeedComment[]
+    }
+}
+
+type ForumFeedCommentResponse = {
+    success: boolean;
+    message: string;
+    response: ForumFeedComment
+}
+
+type ForumFeedComment = {
+    author: MainUser;
+    createdAt: number;
+    parentID?: string;
+    postID: string;
+    text: string;
+    _id: string;
 }
