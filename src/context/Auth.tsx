@@ -2,13 +2,14 @@ import React, { createContext, useContext, ReactNode, useEffect, useState } from
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getUser } from '../service/authService';
+import { ApiResponse, getUser, updateUserData } from '../service/authService';
 import { postReq } from '../utils/api';
 import { endpoints } from '../config/endpoints';
 
 interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   createAcc: (email: string, password: string) => Promise<void>;
+  updateUser: (data: any) => Promise<ApiResponse>;
   logout: () => Promise<void>;
   user: MainUser | null;
   baseUser: BaseUser | null;
@@ -25,7 +26,13 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   const { pathname } = useLocation();
   const [user, setUser] = useState<MainUser | null>(null);
   const [baseUser, setBaseUser] = useState<BaseUser | null>(null);
-
+  const handlePendingData = (currentUser: ApiResponse) => {
+    if (currentUser.response?.username && currentUser.response?.name) {
+      navigate("/")
+    } else {
+      navigate('/username');
+    }
+  }
   useEffect(() => {
     onAuthStateChanged(auth, async (authUser: User | null) => {
       if (authUser) {
@@ -33,7 +40,12 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
         setUser(currentUser.response); // Setting User object received from backend
         setBaseUser(currentUser.response); // Setting User object received from backend
         if (['/login', '/signup'].includes(pathname)) {
-          navigate('/');
+          handlePendingData(currentUser)
+        } else if (pathname === "/") {
+          console.log("USER", currentUser.response)
+          if (!currentUser.response?.username && !currentUser.response?.name) {
+            navigate("/username")
+          }
         }
       } else {
         setUser(null); // Setting state explicitly to null on sign-out
@@ -64,6 +76,12 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
     navigate('/'); // Navigate to home after login
   };
 
+  const updateUser = async (data: any) => {
+    const newData = await updateUserData({ updateData: data })
+    setBaseUser(newData.response);
+    return newData;
+  }
+
   const logout = async () => {
     await signOut(auth);
     setUser(null); // Explicitly setting state to null on logout
@@ -71,7 +89,7 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, user, createAcc, baseUser }}>
+    <AuthContext.Provider value={{ login, logout, user, createAcc, baseUser, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

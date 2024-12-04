@@ -23,5 +23,21 @@ async function uploadMultipleFiles(files: SelectedFile[], path: string): Promise
 	return response.data
 }
 
+async function uploadSingleFile(file: SelectedFile, path: string): Promise<SingleUploadResponse | null> {
+	let data = new FormData();
+	console.log(file)
+	data.append('files', file.file);
+	data.append('path', path);
+	let config = {
+		method: 'POST',
+		maxBodyLength: Infinity,
+		url: endpoints['single-file-upload'],
+		data: data
+	};
+	const response = await axios.request(config)
+	console.log("Upload Response", response.data)
+	return response.data
+}
 
-export { uploadMultipleFiles }
+
+export { uploadMultipleFiles, uploadSingleFile }

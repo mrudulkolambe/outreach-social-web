@@ -77,7 +77,7 @@ const Home = () => {
 
 	return (
 		<RootLayout loading={loading}>
-			<Dialog open={storyOpen.show}>
+			<Dialog open={storyOpen.show} onOpenChange={(e) => setStoryOpen({ ...storyOpen, show: e })}>
 				<DialogContent>
 					<Stories
 						storyContainerStyles={{

@@ -9,6 +9,10 @@ import ForumHome from './app/(main)/forum/Home';
 import Forum from './app/(main)/forum/Forum';
 import ResourceHome from './app/(main)/resources';
 import HelpAndSupport from './app/(main)/help-and-support';
+import Username from './app/username';
+import ProfilePhoto from './app/profile-photo';
+import Interest from './app/interest';
+import Bio from './app/bio';
 
 function App() {
 
@@ -26,7 +30,10 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/username" element={<SignUp />} />
+          <Route path="/username" element={<Username />} />
+          <Route path="/profile-photo" element={<ProfilePhoto />} />
+          <Route path="/interest" element={<Interest />} />
+          <Route path="/bio" element={<Bio />} />
 
           {/* FORUM */}
           <Route path="/forum" element={<ForumHome />} />

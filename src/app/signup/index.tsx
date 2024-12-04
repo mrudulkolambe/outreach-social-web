@@ -7,10 +7,13 @@ import Input from '../../components/Input';
 import { Link } from 'react-router-dom';
 import Button from '../../components/Button';
 import images from '../../config/images';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { useState } from 'react';
+import { useAuthContext } from '@/context/Auth';
+import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/FirebaseAuthErrors';
 
-interface LoginFormInputs {
+export interface SignupFormInputs {
   email: string;
   password: string;
   confirmpassword: string
@@ -18,25 +21,29 @@ interface LoginFormInputs {
 
 export default function SignUp() {
 
-  // const { login } = useAuthContext();
+  const { createAcc } = useAuthContext();
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmpassword, setConfirmPassword] = useState("")
 
-  const { register, formState: { errors } } = useForm<LoginFormInputs>();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormInputs>();
 
-  // const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
-  //   try {
-  //     console.log(data);
-  //     // await login(data.email, data.password);
-  //   } catch (error: any) {
-  //     toast.error(getErrorMessage(error.code || 'unknown'))
-  //   }
-  // };
+  const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
+    try {
+      if (password === confirmpassword) {
+        await createAcc(data.email, data.password);
+      } else {
+        toast.error("Password doesn't match");
+      }
+    } catch (error: any) {
+      toast.error(getErrorMessage(error.code || 'unknown'))
+    }
+  };
   return (
     <>
       <main className="screen flex items-start justify-between">
         <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} />
-        <form className="w-[33%] border border-accent/20 h-full px-12 py-10 flex flex-col justify-between">
+        <form onSubmit={handleSubmit(onSubmit)} className="w-[33%] border border-accent/20 h-full px-12 py-10 flex flex-col justify-between">
           <div className="h-3/5">
             <h1 className="primary-heading text-accent">Hey, <br />Welcome!</h1>
             <p className="font-medium mt-3">To proceed, please enter your name, <br />password and confirm it.</p>
@@ -64,11 +71,11 @@ export default function SignUp() {
                   />
                   <Input
                     register={register('confirmpassword', { required: 'Password is required' })}
-                    onChange={(e) => setPassword(e.currentTarget.value)}
-                    value={password} textarea={false}
+                    onChange={(e) => setConfirmPassword(e.currentTarget.value)}
+                    value={confirmpassword} textarea={false}
                     id="confirmpassword"
                     placeholder="Confirm Password"
-                    error={errors.password}
+                    error={errors.confirmpassword}
                     type="password"
                   />
                   {/* <Input onChange={() => { }} value='' textarea={false} id="confpassword" placeholder="Confirm password" type="password" /> */}
@@ -94,7 +101,7 @@ export default function SignUp() {
             </div>
 
             <div>
-              <Link to={"/profile-photo"}><Button text="Login" loading={false} disabled={false} type="submit" className="" /></Link>
+              <Button text="Sign Up" loading={isSubmitting} disabled={false} type="submit" className="" />
               <p className="font-semibold text-center mt-3">Already have an account? <Link to={"/"} className="font-semibold text-accent">Sign In</Link></p>
             </div>
 
