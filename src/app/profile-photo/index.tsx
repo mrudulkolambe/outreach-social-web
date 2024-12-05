@@ -1,5 +1,5 @@
 import { FaPlus } from "react-icons/fa6";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import images from "../../config/images";
 import TextButton from "@/components/TextButton";
@@ -54,7 +54,7 @@ export default function ProfilePhoto() {
               <h1 className="primary-heading text-accent">Great! Let's add your <br />profile picture</h1>
               <p className="font-medium mt-3">Choose a photo for your profile picture</p>
             </div>
-            <TextButton text="Skip" className="text-button" type="button" />
+            <Link to={"/bio"}><TextButton text="Skip" className="text-button" type="button" /></Link>
           </div>
           <div className="flex items-center justify-center relative">
             <div className="cursor-pointer h-[230px] w-[230px] overflow-hidden bg-gray-300 rounded-full flex items-center justify-center">
