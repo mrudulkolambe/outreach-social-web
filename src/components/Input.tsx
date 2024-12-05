@@ -10,7 +10,7 @@ type InputTypes = {
 	label?: string,
 	disabled?: boolean,
 	textarea?: boolean,
-	register: UseFormRegisterReturn,
+	register?: UseFormRegisterReturn,
 	error?: FieldError;
 }
 

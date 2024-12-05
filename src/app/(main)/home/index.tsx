@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import Postcard from "../../../components/post/Postcard"
 import ForumCard from "../../../components/forum/ForumCard"
 import RootLayout from "../layout"
@@ -14,12 +13,12 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import Stories from 'react-insta-stories';
 import { getUserStories } from "@/service/storyService"
 import moment from "moment"
+import Topbar from "@/components/Topbar"
 
 const Home = () => {
-	const { posts, uploading, uploadProgress, loadMorePosts, hasMorePost } = useFeedContext()
+	const { posts, uploading, uploadProgress, loadMorePosts, hasMorePost, loading } = useFeedContext()
 	const { forums } = useForumContext()
 	const { user } = useAuthContext()
-	const [loading, setLoading] = useState(true)
 	const [stories, setStories] = useState<StoryResponse>({ own: [], user: [] });
 	let emptyStories: any[] = []
 	const [storyOpen, setStoryOpen] = useState({
@@ -62,14 +61,7 @@ const Home = () => {
 	}
 
 	useEffect(() => {
-		setTimeout(() => {
-			setLoading(false)
-		}, 4000);
-	}, [])
-
-	useEffect(() => {
 		if (!storyOpen.show) {
-			// Reset stories to empty once the dialog is fully closed
 			const timer = setTimeout(() => setStoryOpen({ show: false, stories: [] }), 300);
 			return () => clearTimeout(timer);
 		}
@@ -99,9 +91,7 @@ const Home = () => {
 				</DialogContent>
 			</Dialog>
 			<div className='flex flex-col'>
-				<div className='border-b h-[80px] w-full flex items-center justify-end px-9'>
-					<Link to={"/profile"}><img className='h-[30px] w-[30px] rounded-full object-cover' src={user?.imageUrl} alt="" /></Link>
-				</div>
+				<Topbar />
 				<div className='flex items-center py-3 px-10 w-full h-[155px]'>
 					<Swiper
 						className='w-full'
@@ -193,7 +183,7 @@ const Home = () => {
 							}
 						</InfiniteScroll>
 					</div>
-					<div className='main-height w-[25vw] px-5 py-5'>
+					<div className='main-height flex-1 px-5 py-5 overflow-y-auto scrollbar'>
 						<h2 className='text-2xl font-bold'>Join new forum</h2>
 						<div className='mt-4'>
 							{

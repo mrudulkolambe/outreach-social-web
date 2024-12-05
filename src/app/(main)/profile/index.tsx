@@ -4,20 +4,31 @@ import 'swiper/css';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { Link } from 'react-router-dom';
 import Button from '../../../components/Button';
 import PostCard from '../../../components/PostCard';
 import RootLayout from '../layout';
 import { useAuthContext } from '../../../context/Auth';
+import Topbar from '@/components/Topbar';
+import { twMerge } from 'tailwind-merge';
+import { useEffect, useState } from 'react';
+import interestsOptions, { InterestType } from '@/lib/interests';
 
 const Profile = () => {
   const { user, baseUser } = useAuthContext()
+  const [interests, setInterests] = useState<InterestType[]>([])
+  useEffect(() => {
+    if (baseUser?.interest) {
+      const pickedInterests = baseUser.interest.map((interest) => {
+        return interestsOptions.find((item) => item.interest === interest);
+      }) as InterestType[]
+      setInterests(pickedInterests)
+    }
+  }, [baseUser])
+
   return (
     <RootLayout>
       <div className='flex flex-col'>
-        <div className='border-b h-[80px] w-full flex items-center justify-end px-9'>
-          <Link to={"/profile"}><img className='h-[30px] w-[30px] rounded-full object-cover' src={user?.imageUrl} alt="" /></Link>
-        </div>
+        <Topbar />
         <div className='flex primary-height bg-[#FAFAFA]'>
           <div className='w-[80vw] px-10 py-5 overflow-y-auto scrollbar'>
             <div className='flex items-center justify-between'>
@@ -115,15 +126,16 @@ const Profile = () => {
 
             <div className='mt-5'>
               <h2 className='text-xl font-semibold'>Interest</h2>
-              <div className='mt-3'>
-                <div className='bg-white border rounded-full py-1 px-2 flex gap-1 items-center w-max'>
-                  <img src="/interests/mental-health.svg" alt="" />
-                  <p className='font-medium text-sm'>Mental Health</p>
-                </div>
+              <div className='mt-3 flex flex-wrap gap-3'>
+                {
+                  interests.map((interest) => {
+                    return <div className={twMerge("w-max cursor-pointer border-2 hover:bg-black/5 duration-150 h-max px-3 py-2 bg-white shadow-lg rounded-full text-sm flex items-center justify-center gap-1", "border-accent")}><img className="h-6 w-6 object-fill" src={interest.icon} alt={interest.interest} />{interest.interest}</div>
+                  })
+                }
               </div>
             </div>
 
-            <div className='mt-5'>
+            <div className='mt-5 hidden'>
               <h2 className='text-xl font-semibold'>Past post</h2>
               <div className='mt-3 flex items-center relative'>
                 <div className='left-0 bg-white absolute z-30 top-1/2 prevEl cursor-pointer'>

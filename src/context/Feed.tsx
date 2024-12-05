@@ -14,6 +14,7 @@ type FeedContextType = {
   updatePost: (updatedPost: Post) => Promise<void>;
   currentPage: number,
   hasMorePost: boolean,
+  loading: boolean,
   loadMorePosts: () => Promise<void>;
 }
 
@@ -31,7 +32,7 @@ export const FeedContextProvider: React.FC<FeedContextProps> = ({ children }) =>
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { user } = useAuthContext()
   const [tempPosts, setTempPosts] = useState<GetPostsResponse | null>(null);
-
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
     if (user) {
       console.log("FEED TRIGGER")
@@ -77,6 +78,7 @@ export const FeedContextProvider: React.FC<FeedContextProps> = ({ children }) =>
       const posts = await getPosts(1);
       setTempPosts(posts);
       setHasMorePost(posts.totalPages > posts.currentPage)
+      setLoading(false)
     }
   };
 
@@ -116,7 +118,7 @@ export const FeedContextProvider: React.FC<FeedContextProps> = ({ children }) =>
 
 
   return (
-    <FeedContext.Provider value={{ posts, uploading, uploadProgress, fetchPosts, handlePost, updatePost, hasMorePost, currentPage, loadMorePosts }}>
+    <FeedContext.Provider value={{ posts, uploading, uploadProgress, fetchPosts, handlePost, updatePost, hasMorePost, currentPage, loadMorePosts, loading }}>
       {children}
     </FeedContext.Provider>
   );
