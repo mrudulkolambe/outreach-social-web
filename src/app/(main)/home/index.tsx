@@ -184,7 +184,7 @@ const Home = () => {
 						</InfiniteScroll>
 					</div>
 					<div className='main-height flex-1 px-5 py-5 overflow-y-auto scrollbar'>
-						<h2 className='text-2xl font-bold'>Join new forum</h2>
+						<h2 className='text-2xl font-bold text-black'>Join new forum</h2>
 						<div className='mt-4'>
 							{
 								forums.filter((forum: Forum) => !forum.joined.includes(user?._id as string) && forum.userId._id !== user?._id).map((forum: Forum) => {

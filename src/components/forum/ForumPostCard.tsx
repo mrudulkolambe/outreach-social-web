@@ -29,6 +29,7 @@ const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 		setPost(tempPost)
 		await likePost(post);
 	}
+	const [showMore, setShowMore] = useState(false)
 	const [commentText, setCommentText] = useState("")
 	const [comments, setComments] = useState<ForumFeedCommentsResponse | null>(null)
 	const [tempComments, setTempComments] = useState<ForumFeedCommentsResponse | null>(null)
@@ -111,7 +112,8 @@ const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 						{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 right-1 -translate-y-1/2 p-0.5 cursor-pointer", `next_${post._id}`)}><ChevronRight /></span>}
 					</div>
 					<div className='mt-3 flex flex-col gap-3 border-b pb-4'>
-						<p className='text-lg' dangerouslySetInnerHTML={{ __html: post.content }}></p>
+						<p className='text-lg whitespace-pre-wrap' >{post.content.length > 100 && showMore ? post.content : `${post.content.slice(0, 100)}...` }</p>
+						{post.content.length > 100 && <p className='text-accent cursor-pointer' onClick={() => setShowMore(!showMore)}>{showMore ? "Show less" : "Show More"}</p>}
 						<div className='flex gap-3'>
 							<span className='flex gap-1 items-center text-lg'>{post.liked ? <GoHeartFill onClick={() => handleLike()} className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart onClick={() => handleLike()} className='text-gray-500 text-2xl' />} {post.likesCount}</span>
 							<DialogTrigger asChild onClick={() => fetchComments()}>
@@ -122,7 +124,7 @@ const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 				</div >
 
 				<DialogContent className="border-0 flex w-[80vw] h-[90vh] p-0 gap-0 overflow-hidden">
-					<div className='w-3/5 h-full bg-green-500'>
+					<div className='w-3/5 h-full'>
 						<div className='relative h-full' onDoubleClick={handleLike}>
 							{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
 							<Swiper
@@ -195,7 +197,6 @@ const ContentDisplay = ({ user, text, timestamp, comments }: { user: MainUser, t
 	let feedComments = comments.map((comment) => {
 		return <DisplayComment user={comment.author} text={comment.text} timestamp={comment.createdAt} comments={null} />
 	})
-	console.log("COMMENT", feedComments)
 	return <div className='flex flex-col'>
 		<DisplayComment text={text} timestamp={timestamp} user={user} comments={feedComments} />
 	</div>

@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.0",
+    "agora-chat-uikit": "^1.2.1",
     "axios": "^1.7.5",
+    "chat-uikit2": "^3.0.1",
+    "chatuim2": "^1.4.1-beta55",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",

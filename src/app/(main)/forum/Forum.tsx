@@ -92,9 +92,10 @@ const Forum = () => {
 						}
 						{
 							forum?.response?.joined.includes(user?._id as string) && <div className='h-56 mt-4 grid grid-cols-12 w-full'>
-								<div className='col-span-8'>
+								<div className='col-span-8' key={forumPosts?.response?.length + "_forum_posts"}>
 									<InfiniteScroll
-										dataLength={forumPosts?.response?.length! || 0}
+										key={forumPosts?.response?.length + "_forum_posts"}
+										dataLength={forumPosts?.response?.length || 0}
 										next={() => {
 											loadMorePosts()
 										}}
@@ -109,12 +110,13 @@ const Forum = () => {
 									>
 										{
 											forumPosts?.response?.map((forumPost: ForumPost) => {
+												console.log("HEY", forumPost)
 												return <ForumPostCard forumPost={forumPost} />
 											})
 										}
 									</InfiniteScroll>
 								</div>
-								<div className='px-4 py-3 col-span-4'>
+								<div className='px-4 py-3 col-span-4 h-max sticky top-[200px] left-0'>
 									<h3 className='text-xl font-bold'>About</h3>
 									<p className='mt-3'>{forum?.response?.description}</p>
 									{

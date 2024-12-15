@@ -5,6 +5,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiResponse, getUser, updateUserData } from '../service/authService';
 import { postReq } from '../utils/api';
 import { endpoints } from '../config/endpoints';
+import { useAgoraContext } from './Agora';
+import { registerAgoraUserService } from '@/service/agoraService';
 
 interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
@@ -26,6 +28,7 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   const { pathname } = useLocation();
   const [user, setUser] = useState<MainUser | null>(null);
   const [baseUser, setBaseUser] = useState<BaseUser | null>(null);
+  const { loginAgoraUser } = useAgoraContext();
   const handlePendingData = (currentUser: ApiResponse) => {
     if (currentUser.response?.username && currentUser.response?.name) {
       navigate("/")
@@ -37,6 +40,8 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
     onAuthStateChanged(auth, async (authUser: User | null) => {
       if (authUser) {
         const currentUser = await getUser();
+        console.log(currentUser.response._id, "CURRENT USER")
+        registerAgoraUserService(currentUser.response._id);
         setUser(currentUser.response); // Setting User object received from backend
         setBaseUser(currentUser.response); // Setting User object received from backend
         if (['/login', '/signup'].includes(pathname)) {

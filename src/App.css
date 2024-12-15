@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:100,100italic,200,200italic,300,300italic,regular,italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,6 +20,11 @@
 
 body {
   background-color: white;
+  /* font-family: "Poppins" !important; */
+}
+
+.Poppins {
+  /* font-family: "Poppins" !important; */
 }
 
 @layer components {
@@ -101,7 +108,7 @@ body {
   @apply bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300
 }
 
-.page-heading{
+.page-heading {
   @apply text-2xl font-bold;
 }
 
@@ -114,15 +121,15 @@ img {
   -webkit-touch-callout: none;
 }
 
-.video-js.vjs-fluid:not(.vjs-audio-only-mode){
+.video-js.vjs-fluid:not(.vjs-audio-only-mode) {
   height: 100% !important;
 }
 
-.selected{
+.selected {
   position: relative;
 }
 
-.selected::before{
+.selected::before {
   content: "";
   border-radius: 10px;
   height: 3px;
@@ -133,7 +140,11 @@ img {
   left: 0;
 }
 
-.no-scrollbar::-webkit-scrollbar{
+.no-scrollbar::-webkit-scrollbar {
   width: 0px !important;
   height: 0px !important;
+}
+
+.cui-message-base-nickname {
+  display: none !important;
 }

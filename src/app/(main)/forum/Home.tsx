@@ -49,7 +49,7 @@ const ForumHome = () => {
 				<div className='flex flex-col items-start py-3 px-10 w-full bg-accent/5 primary-height overflow-hidden'>
 					<div className='w-full grid grid-cols-12 gap-x-6 flex-1'>
 						<div className='col-span-9 flex flex-col'>
-							<h2 className='page-heading mb-5'>Explore new forum</h2>
+							<h2 className='page-heading mb-5 text-black'>Explore new forum</h2>
 							<div className='gap-x-3 w-full grid grid-cols-2 overflow-auto max-h-[83vh] scrollbar pb-3'>
 								{
 									forums.filter((forum: Forum) => !forum.joined.includes(user?._id as string) && forum.userId._id != user?._id).map((forum: Forum) => {

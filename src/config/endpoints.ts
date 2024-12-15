@@ -41,5 +41,9 @@ export const endpoints = {
     'single-file-upload': `${uploadBaseURL}/upload`,
     'multi-file-upload': `${uploadBaseURL}/multi-upload`,
     'all-users': `${baseURL}/user/get`,
-    'query-users': `${baseURL}/user/search`
+    'query-users': `${baseURL}/user/search`,
+
+
+    // AGORA
+    'agora-chat-token': `${baseURL}/agora/chat/token`
 };

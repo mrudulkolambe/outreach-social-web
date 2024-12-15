@@ -136,7 +136,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 			</div >
 			<DialogTitle className='hidden'>POST by {post.user.username}</DialogTitle>
 			<DialogContent className="border-0 flex w-[80vw] h-[90vh] p-0 gap-0 overflow-hidden">
-				<div className='w-3/5 h-full bg-green-500'>
+				<div className='w-3/5 h-full'>
 					<div className='relative h-full' onDoubleClick={handleLike}>
 						{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
 						<Swiper
