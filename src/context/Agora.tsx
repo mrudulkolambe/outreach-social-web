@@ -19,7 +19,7 @@ export const AgoraContextProvider: React.FC<AgoraProviderProps> = ({ children })
 
 	// Fetch conversations
 	const registerAgoraUser = (username: string) => {
-		registerAgoraUserService(username);
+		// registerAgoraUserService(username);
 	}
 	const updateAgoraUser = (userID: string) => {
 		setAgoraUser(userID)
@@ -27,7 +27,7 @@ export const AgoraContextProvider: React.FC<AgoraProviderProps> = ({ children })
 
 	const loginAgoraUser = (username: string) => {
 		console.log("USERNAME", username)
-		registerAgoraUserService(username);
+		// registerAgoraUserService(username);
 	}
 	return (
 		<AgoraContext.Provider value={{ agoraUser, updateAgoraUser, registerAgoraUser, loginAgoraUser }}>

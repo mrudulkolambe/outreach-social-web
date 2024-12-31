@@ -13,9 +13,10 @@ import Username from './app/username';
 import ProfilePhoto from './app/profile-photo';
 import Interest from './app/interest';
 import Bio from './app/bio';
-import ChatScreen from './app/(main)/chat';
-import { Provider } from 'chatuim2';
-import ChatApp from './app/(main)/chat/chat';
+// import ChatScreen from './app/(main)/chat';
+// import ChatNew from "./app/(main)/chat/chat"
+import MessagingInit from './app/(main)/messaging/page';
+
 
 function App() {
 
@@ -27,11 +28,6 @@ function App() {
   const appKey = "711253789#1445631";
   return (
     <>
-      <Provider
-        initConfig={{
-          appKey: appKey
-        }}
-      >
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
@@ -42,8 +38,8 @@ function App() {
             <Route path="/profile-photo" element={<ProfilePhoto />} />
             <Route path="/interest" element={<Interest />} />
             <Route path="/bio" element={<Bio />} />
-            <Route path="/chat" element={<ChatScreen />} />
-            <Route path="/chat/new" element={<ChatApp />} />
+            <Route path="/chat" element={<MessagingInit />} />
+            {/* <Route path="/chat/new" element={<ChatNew />} /> */}
 
             {/* FORUM */}
             <Route path="/forum" element={<ForumHome />} />
@@ -56,7 +52,6 @@ function App() {
             <Route path="/help-and-support" element={<HelpAndSupport />} />
           </Route>
         </Routes>
-      </Provider>
     </>
   )
 }

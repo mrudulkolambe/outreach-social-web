@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet'
 import Input from './Input'
-import { ConversationList } from 'chatuim2'
+// import { ConversationList } from 'chatuim2'
 
 const Topbar = () => {
 	const { user } = useAuthContext()
@@ -21,9 +21,9 @@ const Topbar = () => {
 						{/* <SheetTitle className='text-2xl'>Chat</SheetTitle> */}
 						<div className='flex flex-col gap-2 border-black/20 py-4'>
 							{/* <Input id='search' placeholder='Search...' onChange={() => { }} value='' type='text' disabled={false} /> */}
-							<ConversationList style={{
+							{/* <ConversationList style={{
 								background: "red"
-							}}/>
+							}}/> */}
 						</div>
 					</SheetHeader>
 				</SheetContent>

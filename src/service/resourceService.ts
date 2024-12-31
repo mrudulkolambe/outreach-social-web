@@ -1,5 +1,6 @@
 import { endpoints } from '@/config/endpoints';
-import { getReq } from '@/utils/api';
+import { getReq, patchReq } from '@/utils/api';
+import { toast } from 'sonner';
 
 async function getResourceCategories(): Promise<ResourceCategoryResponse | null> {
 	const response = await getReq(endpoints["get-resource-categories"]);
@@ -29,6 +30,17 @@ async function getResources(page: number): Promise<ResourcePostsResponse | null>
 	}
 }
 
+async function likeResource(_id: string): Promise<Number> {
+	const response = await patchReq(`${endpoints["like-resource"]}/${_id}`, {});
+	if (response.status === 201 || response.status === 200) {
+		// const data = await response.json()
+		return response.status
+	} else {
+		toast.error("Something went wrong!")
+		return 500;
+	}
+}
 
 
-export { getResourceCategories, getResources }
+
+export { getResourceCategories, getResources, likeResource }

@@ -33,6 +33,7 @@ export const endpoints = {
     // RESOURCE
     'get-resource-categories': `${baseURL}/resource-category/get`,
     'get-resources': `${baseURL}/resource/get`,
+    'like-resource': `${baseURL}/resource/like`,
 
     // STORY
     'create-story': `${baseURL}/story/create`,

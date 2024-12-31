@@ -112,7 +112,7 @@ const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 						{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 right-1 -translate-y-1/2 p-0.5 cursor-pointer", `next_${post._id}`)}><ChevronRight /></span>}
 					</div>
 					<div className='mt-3 flex flex-col gap-3 border-b pb-4'>
-						<p className='text-lg whitespace-pre-wrap' >{post.content.length > 100 && showMore ? post.content : `${post.content.slice(0, 100)}...` }</p>
+						<p className='text-lg whitespace-pre-wrap' >{post.content.length > 100 && showMore ? post.content : `${post.content.slice(0, 100)}...`}</p>
 						{post.content.length > 100 && <p className='text-accent cursor-pointer' onClick={() => setShowMore(!showMore)}>{showMore ? "Show less" : "Show More"}</p>}
 						<div className='flex gap-3'>
 							<span className='flex gap-1 items-center text-lg'>{post.liked ? <GoHeartFill onClick={() => handleLike()} className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart onClick={() => handleLike()} className='text-gray-500 text-2xl' />} {post.likesCount}</span>

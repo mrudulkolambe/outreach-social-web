@@ -1,63 +1,44 @@
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import { Navigation, Pagination } from 'swiper/modules';
-import VideoComponent from "../Video";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { memo, ReactElement, useEffect, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { GoHeart, GoComment, GoHeartFill } from "react-icons/go";
-import { getComments, likePost, postComments } from '../../service/postService';
-import { useFeedContext } from '../../context/Feed';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../ui/post_dialog';
-import moment from 'moment';
-import { FaArrowUp } from "react-icons/fa6";
-import { toast } from 'sonner';
-import HighlighHashtags from '../HighlighHashtags';
-import Avatar from "react-avatar"
+import moment from 'moment'
+import React, { ReactElement, useEffect, useState } from 'react'
+import { Navigation, Pagination } from 'swiper/modules'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { twMerge } from 'tailwind-merge'
+import VideoComponent from '../Video'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../ui/post_dialog'
+import { getComments, postComments } from '@/service/postService'
+import { GoComment, GoHeart, GoHeartFill } from 'react-icons/go'
+import { likeResource } from '@/service/resourceService'
+import { toast } from 'sonner'
+import { FaArrowUp } from 'react-icons/fa6'
+import Avatar from 'react-avatar'
 
-const Postcard = memo(({ post }: { post: Post }) => {
-	const { updatePost } = useFeedContext();
+const ResourcePostCard = ({ post, selectedCategory, }: { post: ResourcePost, selectedCategory: string }) => {
+	const [showMore, setShowMore] = useState(false)
+	const [liked, setLiked] = useState(false)
+	const [likesCount, setLikesCount] = useState(0)
 	const [isDialogOpen, setDialogOpen] = useState(false)
 	const [comments, setComments] = useState<FeedCommentsResponse | null>(null)
 	const [tempComments, setTempComments] = useState<FeedCommentsResponse | null>(null)
 	const [commentsLoading, setCommentsLoading] = useState(true)
 	const [postCommentLoading, setPostCommentLoading] = useState(false)
-	const [liked, setLiked] = useState({
-		liked: post.liked,
-		likeCount: post.likesCount
-	})
-	const [commentText, setCommentText] = useState("")
-	const [showMore, setShowMore] = useState(false)
-	const handleLike = async () => {
-		let tempPost: Post = {
-			_id: post._id,
-			block: post.block,
-			commentCount: post.commentCount,
-			content: post.content,
-			createdAt: post.createdAt,
-			liked: !post.liked,
-			likesCount: post.liked ? post.likesCount - 1 : post.likesCount + 1,
-			media: post.media,
-			public: post.public,
-			reportsOrFlag: post.reportsOrFlag,
-			tags: post.tags,
-			updatedAt: post.updatedAt,
-			user: post.user
+	const [commentCount, setCommentCount] = useState(0)
+	useEffect(() => {
+		setLikesCount(post.likesCount)
+		setCommentCount(post.commentCount)
+		if (post.liked) {
+			setLiked(true)
+		} else {
+			setLiked(false)
 		}
-		setLiked({
-			likeCount: tempPost.likesCount,
-			liked: tempPost.liked
-		})
-		updatePost(tempPost);
-		await likePost(post)
-	}
+	}, [post])
 
 	const fetchComments = async () => {
 		const commentResponse = await getComments(post._id);
 		setTempComments(commentResponse)
 		setCommentsLoading(false)
 	}
-
+	const [commentText, setCommentText] = useState("")
 	const commentPost = async () => {
 		setPostCommentLoading(true)
 		const comment = await postComments(post._id, commentText);
@@ -66,6 +47,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 			const oldCommentArray = oldComments.response;
 			oldCommentArray?.push(comment.response);
 			setTempComments(oldComments as FeedCommentsResponse);
+			setCommentCount(oldCommentArray?.length as number)
 			setCommentText("")
 		} else {
 			toast.error("Couldn't post the comment.")
@@ -80,6 +62,17 @@ const Postcard = memo(({ post }: { post: Post }) => {
 		}
 	}, [tempComments])
 
+
+	const handleLike = async () => {
+		if (liked) {
+			setLiked(false)
+			setLikesCount(likesCount - 1)
+		} else {
+			setLiked(true)
+			setLikesCount(likesCount + 1)
+		}
+		await likeResource(post._id)
+	}
 	return (
 		<Dialog onOpenChange={(e) => {
 			setDialogOpen(e)
@@ -87,16 +80,19 @@ const Postcard = memo(({ post }: { post: Post }) => {
 				fetchComments()
 			}
 		}} open={isDialogOpen}>
-			<div className='px-7 flex flex-col pt-4'>
-				<div className='flex gap-4 items-center'>
-					{
-						!post.public ?
-							<div className='h-[42px] w-[42px] bg-accent flex items-center justify-center text-center text-xl text-white rounded-full font-semibold'>A</div> :
-							post.user.imageUrl ? <img src={post.user.imageUrl} className='h-[42px] w-[42px] rounded-full object-cover' /> : <Avatar name={post.user.name} size={"42"} round color='#1b57bf'/>
-					}
-					<h4 className='font-medium'>{post.public ? post.user.name : "Anonymous"}</h4>
+			<div className={post.category === selectedCategory || true ? 'flex flex-col mb-5' : "hidden"}>
+				<div className='flex gap-3'>
+					<img className='h-12 w-12 rounded-full' src={post.user.imageUrl} alt="" />
+					<div className='flex flex-col'>
+						<h2 className='text-lg font-bold text-black'>{post.user.name}</h2>
+						<p className='font-semibold'>@{post.user.username}</p>
+						<p className='text-sm'>{moment(post.createdAt).format("DD/MM/YYYY")}</p>
+					</div>
 				</div>
-				<div className='mt-3 relative' onDoubleClick={handleLike}>
+				<p className='text-lg font-bold text-black' dangerouslySetInnerHTML={{ __html: post.title }}></p>
+				<p className='text-lg whitespace-pre-wrap' >{post.content.length > 100 && showMore ? post.content : `${post.content.slice(0, 100)}...`}</p>
+				{post.content.length > 100 && <p className='text-accent cursor-pointer' onClick={() => setShowMore(!showMore)}>{showMore ? "Show less" : "Show More"}</p>}
+				<div className='mt-3 relative'>
 					{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
 					<Swiper
 						modules={[Navigation, Pagination]}
@@ -106,35 +102,33 @@ const Postcard = memo(({ post }: { post: Post }) => {
 						pagination
 						navigation={
 							{
-								nextEl: `.next_${post._id}`,
-								prevEl: `.prev_${post._id}`
+								nextEl: `.resource_next_${post._id}`,
+								prevEl: `.resource_prev_${post._id}`
 							}
 						}
 						slidesPerView={1}
 					>
 						{
-							post.media.map((media) => {
-								return <SwiperSlide key={media.url}>
-									{
-										media.type == "video" ? <VideoComponent isPopup={false} videoUrl={media.url} /> : <img className='rounded-xl w-full h-[402px] object-cover' src={media.url} alt="" />
-									}
-								</SwiperSlide>
+							post.media.map((media: any) => {
+								if (media.type == "video") {
+									return <SwiperSlide key={media.url}>
+										<VideoComponent isPopup={false} videoUrl={media.url} />
+									</SwiperSlide>
+								} else {
+									return <SwiperSlide key={media.url}><img className='rounded-xl w-full h-[402px] object-cover' src={media.url} alt="" /></SwiperSlide>
+								}
 							})
 						}
 					</Swiper>
 					{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 right-1 -translate-y-1/2 p-0.5 cursor-pointer", `next_${post._id}`)}><ChevronRight /></span>}
 				</div>
-				<div className='mt-3 flex flex-col gap-3 border-b pb-4'>
-					<p className='text-lg whitespace-pre-wrap' >{post.content.length > 100 && showMore ? <HighlighHashtags text={post.content} /> : `${post.content.slice(0, 100)}...`}</p>
-					{post.content.length > 100 && <p className='text-accent cursor-pointer' onClick={() => setShowMore(!showMore)}>{showMore ? "Show less" : "Show More"}</p>}
-					<div className='flex gap-3' key={`${post._id} ${liked.liked} ${liked.likeCount}`}>
-						<span className='flex gap-1 items-center text-lg'>{liked.liked ? <GoHeartFill onClick={handleLike} className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart onClick={handleLike} className='text-gray-500 text-2xl' />} {liked.likeCount}</span>
-						<DialogTrigger>
-							<span className='flex gap-1 items-center text-lg'><GoComment className='text-gray-500 text-2xl' /> {post.commentCount}</span>
-						</DialogTrigger>
-					</div>
+				<div className='flex gap-3 mt-3'>
+					<span className='flex gap-1 items-center text-lg'>{liked ? <GoHeartFill onClick={() => handleLike()} className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart onClick={() => handleLike()} className='text-gray-500 text-2xl' />} {likesCount}</span>
+					<DialogTrigger asChild onClick={() => fetchComments()}>
+						<span className='flex gap-1 items-center text-lg'><GoComment className='text-gray-500 text-2xl' />{commentCount}</span>
+					</DialogTrigger>
 				</div>
-			</div >
+			</div>
 			<DialogTitle className='hidden'>POST by {post.user.username}</DialogTitle>
 			<DialogContent className="border-0 flex w-[80vw] h-[90vh] p-0 gap-0 overflow-hidden">
 				<div className='w-3/5 h-full'>
@@ -170,7 +164,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 				<div className='w-2/5 h-[90vh] flex flex-col'>
 					<div className='flex items-center w-full h-16 px-4 border-b border-black/10'>
 						<div className='flex gap-2 items-center'>
-							{post.user.imageUrl ? <img src={post.user.imageUrl} className='h-10 w-10 rounded-full' alt="" /> : <Avatar name={post.user.name} round size='40' color='#1b57bf'/>}
+							{post.user.imageUrl ? <img src={post.user.imageUrl} className='h-10 w-10 rounded-full' alt="" /> : <Avatar name={post.user.name} round size='40' color='#1b57bf' />}
 							<h2 className='font-semibold text-black text-lg'>@{post.user.username}</h2>
 						</div>
 					</div>
@@ -188,7 +182,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 					</div>
 					<div className=' pt-3 h-32 w-full border-t-2 border-black/20 flex flex-col justify-between'>
 						<div className='flex flex-col'>
-							<span onClick={handleLike} className='px-6 scale-105 cursor-pointer flex gap-1 items-center'>{liked.liked ? <GoHeartFill className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart className='text-gray-500 text-2xl' />} {liked.likeCount} likes</span>
+							<span onClick={handleLike} className='px-6 scale-105 cursor-pointer flex gap-1 items-center'>{liked ? <GoHeartFill className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart className='text-gray-500 text-2xl' />} {likesCount} likes</span>
 							<p className='px-6 text-xs font-semibold mt-2'>{moment(post.createdAt).fromNow()}</p>
 						</div>
 						<div className='pr-3 items-center mt-3 border-t-2 border-black/20 flex-1 flex relative'>
@@ -198,11 +192,13 @@ const Postcard = memo(({ post }: { post: Post }) => {
 					</div>
 				</div>
 			</DialogContent>
-		</Dialog >
+		</Dialog>
 	)
-})
+}
 
-export default Postcard
+export default ResourcePostCard
+
+
 
 const ContentDisplay = ({ user, text, timestamp, comments }: { user: MainUser, text: string, timestamp: string | number, comments: FeedComment[] }) => {
 	let feedComments = comments.map((comment) => {

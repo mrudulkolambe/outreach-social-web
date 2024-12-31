@@ -70,8 +70,8 @@ export const likePost = async (post: Post) => {
   }
 }
 
-export const getComments = async (post: Post): Promise<FeedCommentsResponse | null> => {
-  const response = await getReq(`${endpoints["get-feed-comments"]}/${post._id}`)
+export const getComments = async (_id: String): Promise<FeedCommentsResponse | null> => {
+  const response = await getReq(`${endpoints["get-feed-comments"]}/${_id}`)
   if (response.ok) {
     const data = await response.json();
     return data

@@ -88,7 +88,7 @@ const ForumHome = () => {
 								</DialogTrigger>
 								<DialogContent className="w-[50vw]">
 									<DialogHeader>
-										<DialogTitle className='text-2xl font-bold'>Create Forum</DialogTitle>
+										<DialogTitle className='text-2xl font-bold text-black'>Create Forum</DialogTitle>
 									</DialogHeader>
 									<div className="grid gap-4 py-4">
 										<div className='flex flex-col gap-1'>
@@ -115,7 +115,7 @@ const ForumHome = () => {
 								</DialogContent>
 							</Dialog>
 							<div className='shadow-lg px-5 w-full mt-3 flex flex-col flex-1 max-h-[83vh] bg-white overflow-auto scrollbar gap-3 py-3 rounded-lg'>
-								<h3 className='text-xl font-bold mb-1'>List of joined forums</h3>
+								<h3 className='text-xl font-bold mb-1 text-black'>List of joined forums</h3>
 								{
 									forums.filter((forum: Forum) => forum.joined.includes(user?._id as string) || forum.userId._id === user?._id).map((forum: Forum) => {
 										return (

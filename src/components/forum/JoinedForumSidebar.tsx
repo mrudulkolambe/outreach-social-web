@@ -7,7 +7,7 @@ const JoinedForumSidebar = () => {
 	const {user} = useAuthContext();
 	return (
 		<div className='flex flex-col gap-3'>
-			<h2 className='font-bold text-xl'>List of joined forums</h2>
+			<h2 className='font-bold text-xl text-black'>List of joined forums</h2>
 			{
 				forums.filter((forum: Forum) => forum.joined.includes(user?._id as string) || forum.userId._id === user?._id).map((forum: Forum) => {
 					return (

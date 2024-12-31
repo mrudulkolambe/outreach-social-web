@@ -21,6 +21,11 @@ export interface ForumPostsResponse {
   totalPages: number,
   response: ForumPost[] | null;
 }
+export interface ForumPostResponse {
+  success: boolean;
+  message: string;
+  response: ForumPost | null;
+}
 
 export const getForums = async (): Promise<ForumsResponse> => {
   try {
@@ -120,7 +125,6 @@ export const getForumPosts = async (_id: string, currentPage: number): Promise<F
   }
 }
 
-
 export const likePost = async (post: ForumPost) => {
   try {
     const response = await patchReq(`${endpoints['like-forum-feed']}/${post._id}`, {});
@@ -153,5 +157,19 @@ export const postComments = async (postID: string, text: string): Promise<ForumF
     return data as FeedCommentResponse;
   } else {
     return null
+  }
+}
+
+export const createForumPost = async (reqData: object, forumID: string): Promise<ForumPostResponse | null> => {
+  try {
+    const response = await postReq(`${endpoints['create-forum-post']}/${forumID}`, reqData);
+    const data = await response.json();
+    return data
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to fetch",
+      response: null,
+    };
   }
 }
