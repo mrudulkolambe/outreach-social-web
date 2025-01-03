@@ -1,63 +1,182 @@
-import React, { Component, useEffect } from "react";
-import {
-	UIKitProvider,
-	Chat,
-	ConversationList,
-	useClient,
-	rootStore,
-} from "agora-chat-uikit";
-import "agora-chat-uikit/style.css";
 
-const appKey = "711253789#1445631"; // your appKey
-const user = "66be1bbec3ac3fa2bd5d52b6"; // your user ID
-const agoraToken = "007eJxTYDgh9bOo4r8Pl+wOScbI1XcZXFc+i5T6ksp48EPs55W2TS8VGCwNDS2MDI2NzNJMLUwMzCyTjJJN05JNEo3NjMxMklMNn08tTm8IZGSQ2j2FmZGBlYERCEF8FQZT82QLM0sLA90kU9NUXUPD1DQgyzxJNzHNJCU51czA3DDVHABR0Cdg"
 
-const conversation = {
-	chatType: "singleChat", // 'singleChat' || 'groupChat'
-	conversationId: "agora", // target user id or group id
-	name: "Agora", // target user nickname or group name
-	lastMessage: {},
-};
+// import { useEffect, useState, useRef } from "react";
+// import "./App.css";
+// import AC from "agora-chat";
 
-const ChatApp = () => {
-	const client = useClient();
-	useEffect(() => {
-		client &&
-			client
-				.open({
-					user,
-					agoraToken,
-				})
-				.then((res: any) => {
-					console.log("Token fetched successfully", res);
-					//   rootStore.conversationStore.addConversation(conversation); // Add a conversation
-				});
-	}, [client]);
+// function App() {
+//   // Replaces <Your app key> with your app key.
+//   const appKey = "<Your app key>";
+//   const [userId, setUserId] = useState("");
+//   const [token, setToken] = useState("");
+//   const [isLoggedIn, setIsLoggedIn] = useState(false);
+//   const [peerId, setPeerId] = useState("");
+//   const [message, setMessage] = useState("");
+//   const [logs, setLogs] = useState([]);
+//   const chatClient = useRef(null);
 
-	return (
-		<div className="flex h-screen">
-			<div className="w-1/2">
-				<ConversationList />
-			</div>
-			<div className="w-1/2">
-				<Chat />
-			</div>
-		</div>
-	);
-};
+//   // Logs into Agora Chat.
+//   const handleLogin = () => {
+//     if (userId && token) {
+//       chatClient?.current?.open({
+//         user: userId,
+//         // Use agoraToken for v1.2.1 and earlier, but accessToken for 1.2.2 and later.
+//         accessToken: token,
+//       });
+//     } else {
+//       addLog("Please enter userId and token");
+//     }
+//   };
 
-class App extends Component {
-	render() {
-		return (
-			<UIKitProvider
-				initConfig={{
-					appKey,
-				}}
-			>
-				<ChatApp />
-			</UIKitProvider>
-		);
-	}
-}
+//   // Logs out.
+//   const handleLogout = () => {
+//     chatClient?.current?.close();
+//     setIsLoggedIn(false);
+//     setUserId("");
+//     setToken("");
+//     setPeerId("");
+//   };
 
-export default App;
+//   // Sends a peer-to-peer message.
+//   const handleSendMessage = async () => {
+//     if (message.trim()) {
+//       try {
+//         const option = {
+//           chatType: "singleChat", // Sets the chat type as a one-to-one chat.
+//           type: "txt", // Sets the message type.
+//           to: peerId, // Sets the recipient of the message with user ID.
+//           msg: message, // Sets the message content.
+//         };
+//         let msg = AC.message.create(option);
+
+//         await chatClient.current.send(msg);
+//         addLog(`Message send to ${peerId}: ${message}`);
+//         setMessage("");
+//       } catch (error) {
+//         addLog(`Message send failed: ${error.message}`);
+//       }
+//     } else {
+//       addLog("Please enter message content");
+//     }
+//   };
+
+//   // Add log.
+//   const addLog = (log) => {
+//     setLogs((prevLogs) => [...prevLogs, log]);
+//   };
+
+//   useEffect(() => {
+//     // Initializes the Web client.
+//     chatClient.current = new AC.connection({
+//       appKey: appKey,
+//     });
+
+//     // Adds the event handler.
+//     chatClient.current.addEventHandler("connection&message", {
+//       // Occurs when the app is connected to Agora Chat.
+//       onConnected: () => {
+//         setIsLoggedIn(true);
+//         addLog(`User ${userId} Connect success !`);
+//       },
+//       // Occurs when the app is disconnected from Agora Chat.
+//       onDisconnected: () => {
+//         setIsLoggedIn(false);
+//         addLog(`User Logout!`);
+//       },
+//       // Occurs when a text message is received.
+//       onTextMessage: (message) => {
+//         addLog(`${message.from}: ${message.msg}`);
+//       },
+//       // Occurs when the token is about to expire.
+//       onTokenWillExpire: () => {
+//         addLog("Token is about to expire");
+//       },
+//       // Occurs when the token has expired.
+//       onTokenExpired: () => {
+//         addLog("Token has expired");
+//       },
+//       onError: (error) => {
+//         addLog(`on error: ${error.message}`);
+//       },
+//     });
+//   }, []);
+
+//   return (
+//     <>
+//       <div
+//         style={{
+//           width: "500px",
+//           display: "flex",
+//           gap: "10px",
+//           flexDirection: "column",
+//         }}
+//       >
+//         <h2>Agora Chat Examples</h2>
+//         {!isLoggedIn ? (
+//           <>
+//             <div>
+//               <label>UserID: </label>
+//               <input
+//                 type="text"
+//                 value={userId}
+//                 onChange={(e) => setUserId(e.target.value)}
+//                 placeholder="Enter the user ID"
+//               />
+//             </div>
+//             <div>
+//               <label>Token: </label>
+//               <input
+//                 type="text"
+//                 value={token}
+//                 onChange={(e) => setToken(e.target.value)}
+//                 placeholder="Enter the token"
+//               />
+//             </div>
+//             <button onClick={handleLogin}>Login</button>
+//           </>
+//         ) : (
+//           <>
+//             <h3>Welcome, {userId}</h3>
+//             <button onClick={handleLogout}>Logout</button>
+//             <div>
+//               <label>Peer userID: </label>
+//               <input
+//                 type="text"
+//                 value={peerId}
+//                 onChange={(e) => setPeerId(e.target.value)}
+//                 placeholder="Enter the peer user ID"
+//               />
+//             </div>
+//             <div>
+//               <label>Peer message: </label>
+//               <input
+//                 type="text"
+//                 value={message}
+//                 onChange={(e) => setMessage(e.target.value)}
+//                 placeholder="Input message"
+//               />
+//               <button onClick={handleSendMessage}>Send</button>
+//             </div>
+//           </>
+//         )}
+
+//         <h3>Operation log</h3>
+//         <div
+//           style={{
+//             height: "300px",
+//             overflowY: "auto",
+//             border: "1px solid #ccc",
+//             padding: "10px",
+//             textAlign: "left",
+//           }}
+//         >
+//           {logs.map((log, index) => (
+//             <div key={index}>{log}</div>
+//           ))}
+//         </div>
+//       </div>
+//     </>
+//   );
+// }
+
+// export default App;

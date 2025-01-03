@@ -2,22 +2,30 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { Navigation, Pagination } from 'swiper/modules';
 import VideoComponent from "../Video";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, EllipsisVertical } from "lucide-react";
 import { memo, ReactElement, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { GoHeart, GoComment, GoHeartFill } from "react-icons/go";
 import { getComments, likePost, postComments } from '../../service/postService';
 import { useFeedContext } from '../../context/Feed';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../ui/post_dialog';
+import { Dialog as DialogDefault, DialogContent as DialogContentDefault, DialogTitle as DialogTitleDefault, DialogDescription as DialogDescriptionDefault } from '../ui/post_dialog';
 import moment from 'moment';
 import { FaArrowUp } from "react-icons/fa6";
 import { toast } from 'sonner';
 import HighlighHashtags from '../HighlighHashtags';
 import Avatar from "react-avatar"
+import { DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenu } from '../ui/dropdown-menu';
+import { useAuthContext } from '@/context/Auth';
+import Input from '../Input';
+import Button from '../Button';
 
 const Postcard = memo(({ post }: { post: Post }) => {
+	const { baseUser } = useAuthContext()
 	const { updatePost } = useFeedContext();
 	const [isDialogOpen, setDialogOpen] = useState(false)
+	const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
+
 	const [comments, setComments] = useState<FeedCommentsResponse | null>(null)
 	const [tempComments, setTempComments] = useState<FeedCommentsResponse | null>(null)
 	const [commentsLoading, setCommentsLoading] = useState(true)
@@ -79,22 +87,37 @@ const Postcard = memo(({ post }: { post: Post }) => {
 			setComments({ ...tempComments, response: sortedCommentsResponse });
 		}
 	}, [tempComments])
+	const handleOpenChange = (isOpen: boolean) => {
+		setIsReportDialogOpen(isOpen);
+		if (!isOpen) {
+			document.body.style.pointerEvents = "";
+		}
+	};
 
 	return (
-		<Dialog onOpenChange={(e) => {
-			setDialogOpen(e)
-			if (e) {
-				fetchComments()
-			}
-		}} open={isDialogOpen}>
+		<>
 			<div className='px-7 flex flex-col pt-4'>
-				<div className='flex gap-4 items-center'>
-					{
-						!post.public ?
-							<div className='h-[42px] w-[42px] bg-accent flex items-center justify-center text-center text-xl text-white rounded-full font-semibold'>A</div> :
-							post.user.imageUrl ? <img src={post.user.imageUrl} className='h-[42px] w-[42px] rounded-full object-cover' /> : <Avatar name={post.user.name} size={"42"} round color='#1b57bf'/>
-					}
-					<h4 className='font-medium'>{post.public ? post.user.name : "Anonymous"}</h4>
+				<div className=' w-full flex items-center justify-between'>
+					<div className='flex gap-4 items-center'>
+						{
+							!post.public ?
+								<div className='h-[42px] w-[42px] bg-accent flex items-center justify-center text-center text-xl text-white rounded-full font-semibold'>A</div> :
+								post.user.imageUrl ? <img src={post.user.imageUrl} className='h-[42px] w-[42px] rounded-full object-cover' /> : <Avatar name={post.user.name} size={"42"} round color='#1b57bf' />
+						}
+						<h4 className='font-medium'>{post.public ? post.user.name : "Anonymous"}</h4>
+					</div>
+					<DropdownMenu onOpenChange={(e) => {
+						if (!e) {
+							document.body.style.pointerEvents = "";
+						}
+					}}>
+						<DropdownMenuTrigger><span className='h-10 w-10 rounded-lg bg-black/5 flex items-center justify-center'><EllipsisVertical size={20} /></span></DropdownMenuTrigger>
+						<DropdownMenuContent className='w-[200px]'>
+							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base'>Edit</DropdownMenuItem>}
+							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base'>Delete</DropdownMenuItem>}
+							{baseUser?._id !== post.user._id && <DropdownMenuItem className='text-base' onClick={() => setIsReportDialogOpen(true)}>Report</DropdownMenuItem>}
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 				<div className='mt-3 relative' onDoubleClick={handleLike}>
 					{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
@@ -129,76 +152,96 @@ const Postcard = memo(({ post }: { post: Post }) => {
 					{post.content.length > 100 && <p className='text-accent cursor-pointer' onClick={() => setShowMore(!showMore)}>{showMore ? "Show less" : "Show More"}</p>}
 					<div className='flex gap-3' key={`${post._id} ${liked.liked} ${liked.likeCount}`}>
 						<span className='flex gap-1 items-center text-lg'>{liked.liked ? <GoHeartFill onClick={handleLike} className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart onClick={handleLike} className='text-gray-500 text-2xl' />} {liked.likeCount}</span>
-						<DialogTrigger>
-							<span className='flex gap-1 items-center text-lg'><GoComment className='text-gray-500 text-2xl' /> {post.commentCount}</span>
-						</DialogTrigger>
+						<Dialog onOpenChange={(e) => {
+							setDialogOpen(e)
+							if (e) {
+								fetchComments()
+							}
+						}} open={isDialogOpen}><DialogTrigger>
+								<span className='flex gap-1 items-center text-lg'><GoComment className='text-gray-500 text-2xl' /> {post.commentCount}</span>
+							</DialogTrigger>
+							<DialogTitle className='hidden'>POST by {post.user.username}</DialogTitle>
+							<DialogContent className="border-0 flex w-[80vw] h-[90vh] p-0 gap-0 overflow-hidden">
+								<div className='w-3/5 h-full'>
+									<div className='relative h-full' onDoubleClick={handleLike}>
+										{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
+										<Swiper
+											modules={[Navigation, Pagination]}
+											className='w-full h-full'
+											grabCursor
+											spaceBetween={40}
+											pagination
+											navigation={
+												{
+													nextEl: `.next_${post._id}`,
+													prevEl: `.prev_${post._id}`
+												}
+											}
+											slidesPerView={1}
+										>
+											{
+												post.media.map((media) => {
+													return <SwiperSlide key={media.url} className='h-full'>
+														{
+															media.type == "video" ? <VideoComponent isPopup={true} videoUrl={media.url} /> : <img className={'w-full h-full object-cover'} src={media.url} alt="" />
+														}
+													</SwiperSlide>
+												})
+											}
+										</Swiper>
+										{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 right-1 -translate-y-1/2 p-0.5 cursor-pointer", `next_${post._id}`)}><ChevronRight /></span>}
+									</div>
+								</div>
+								<div className='w-2/5 h-[90vh] flex flex-col'>
+									<div className='flex items-center w-full h-16 px-4 border-b border-black/10'>
+										<div className='flex gap-2 items-center'>
+											{post.user.imageUrl ? <img src={post.user.imageUrl} className='h-10 w-10 rounded-full' alt="" /> : <Avatar name={post.user.name} round size='40' color='#1b57bf' />}
+											<h2 className='font-semibold text-black text-lg'>@{post.user.username}</h2>
+										</div>
+									</div>
+									<div className='px-4 py-3 flex-1 w-full gap-y-4 flex-col flex overflow-auto scrollbar'>
+										<ContentDisplay user={post.user} text={post.content} timestamp={post.createdAt} comments={[]} />
+										{
+											commentsLoading ? <p className='text-sm'>Loading...</p> : comments?.response?.filter((comment: FeedComment) => {
+												return comment.parentID == null || comment.parentID == undefined || comment.parentID == ""
+											}).map((comment: FeedComment) => {
+												return <ContentDisplay text={comment.text} timestamp={comment.createdAt} user={comment.author} comments={comments.response.filter((nestedComment) => {
+													return nestedComment.parentID === comment._id;
+												})} />
+											})
+										}
+									</div>
+									<div className=' pt-3 h-32 w-full border-t-2 border-black/20 flex flex-col justify-between'>
+										<div className='flex flex-col'>
+											<span onClick={handleLike} className='px-6 scale-105 cursor-pointer flex gap-1 items-center'>{liked.liked ? <GoHeartFill className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart className='text-gray-500 text-2xl' />} {liked.likeCount} likes</span>
+											<p className='px-6 text-xs font-semibold mt-2'>{moment(post.createdAt).fromNow()}</p>
+										</div>
+										<div className='pr-3 items-center mt-3 border-t-2 border-black/20 flex-1 flex relative'>
+											<input onChange={(e) => setCommentText(e.target.value)} value={commentText} type="text" className='flex-1 h-full input rounded-none border-0' placeholder='Comment here...' />
+											<button onClick={commentPost} disabled={postCommentLoading} className='disabled:bg-accent/50 bg-accent max-h-10 h-10 w-10 max-w-10 aspect-square rounded-full flex items-center justify-center text-white'><FaArrowUp className='text-white' /></button>
+										</div>
+									</div>
+								</div>
+							</DialogContent>
+						</Dialog>
 					</div>
 				</div>
 			</div >
-			<DialogTitle className='hidden'>POST by {post.user.username}</DialogTitle>
-			<DialogContent className="border-0 flex w-[80vw] h-[90vh] p-0 gap-0 overflow-hidden">
-				<div className='w-3/5 h-full'>
-					<div className='relative h-full' onDoubleClick={handleLike}>
-						{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
-						<Swiper
-							modules={[Navigation, Pagination]}
-							className='w-full h-full'
-							grabCursor
-							spaceBetween={40}
-							pagination
-							navigation={
-								{
-									nextEl: `.next_${post._id}`,
-									prevEl: `.prev_${post._id}`
-								}
-							}
-							slidesPerView={1}
-						>
-							{
-								post.media.map((media) => {
-									return <SwiperSlide key={media.url} className='h-full'>
-										{
-											media.type == "video" ? <VideoComponent isPopup={true} videoUrl={media.url} /> : <img className={'w-full h-full object-cover'} src={media.url} alt="" />
-										}
-									</SwiperSlide>
-								})
-							}
-						</Swiper>
-						{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 right-1 -translate-y-1/2 p-0.5 cursor-pointer", `next_${post._id}`)}><ChevronRight /></span>}
+
+			<DialogDefault onOpenChange={handleOpenChange} open={isReportDialogOpen}>
+				<DialogContentDefault className='w-[30vw]'>
+					<DialogTitleDefault className='text-black text-xl font-bold'>Report Post</DialogTitleDefault>
+					<DialogDescriptionDefault >Are you sure you want to report the post?</DialogDescriptionDefault>
+					<div className='flex flex-wrap gap-x-4 gap-y-3'>
+						<div className='px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer'>Post reasons Test 0</div>
+						<div className='px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer'>Post reasons Test 1</div>
+						<div className='px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer'>Post reasons Test 2</div>
 					</div>
-				</div>
-				<div className='w-2/5 h-[90vh] flex flex-col'>
-					<div className='flex items-center w-full h-16 px-4 border-b border-black/10'>
-						<div className='flex gap-2 items-center'>
-							{post.user.imageUrl ? <img src={post.user.imageUrl} className='h-10 w-10 rounded-full' alt="" /> : <Avatar name={post.user.name} round size='40' color='#1b57bf'/>}
-							<h2 className='font-semibold text-black text-lg'>@{post.user.username}</h2>
-						</div>
-					</div>
-					<div className='px-4 py-3 flex-1 w-full gap-y-4 flex-col flex overflow-auto scrollbar'>
-						<ContentDisplay user={post.user} text={post.content} timestamp={post.createdAt} comments={[]} />
-						{
-							commentsLoading ? <p className='text-sm'>Loading...</p> : comments?.response?.filter((comment: FeedComment) => {
-								return comment.parentID == null || comment.parentID == undefined || comment.parentID == ""
-							}).map((comment: FeedComment) => {
-								return <ContentDisplay text={comment.text} timestamp={comment.createdAt} user={comment.author} comments={comments.response.filter((nestedComment) => {
-									return nestedComment.parentID === comment._id;
-								})} />
-							})
-						}
-					</div>
-					<div className=' pt-3 h-32 w-full border-t-2 border-black/20 flex flex-col justify-between'>
-						<div className='flex flex-col'>
-							<span onClick={handleLike} className='px-6 scale-105 cursor-pointer flex gap-1 items-center'>{liked.liked ? <GoHeartFill className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart className='text-gray-500 text-2xl' />} {liked.likeCount} likes</span>
-							<p className='px-6 text-xs font-semibold mt-2'>{moment(post.createdAt).fromNow()}</p>
-						</div>
-						<div className='pr-3 items-center mt-3 border-t-2 border-black/20 flex-1 flex relative'>
-							<input onChange={(e) => setCommentText(e.target.value)} value={commentText} type="text" className='flex-1 h-full input rounded-none border-0' placeholder='Comment here...' />
-							<button onClick={commentPost} disabled={postCommentLoading} className='disabled:bg-accent/50 bg-accent max-h-10 h-10 w-10 max-w-10 aspect-square rounded-full flex items-center justify-center text-white'><FaArrowUp className='text-white' /></button>
-						</div>
-					</div>
-				</div>
-			</DialogContent>
-		</Dialog >
+					<Input textarea={true} id='report' onChange={() => { }} placeholder='Message' type='text' value={"asda"} />
+					<Button text='Submit' disabled={false} className='' loading={false} type='button' />
+				</DialogContentDefault>
+			</DialogDefault>
+		</>
 	)
 })
 

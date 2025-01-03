@@ -148,3 +148,7 @@ img {
 .cui-message-base-nickname {
   display: none !important;
 }
+
+body{
+  pointer-events: all !important;
+}
