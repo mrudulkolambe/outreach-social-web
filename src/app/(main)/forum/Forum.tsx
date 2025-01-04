@@ -8,7 +8,6 @@ import { CiLock } from "react-icons/ci";
 import { useAuthContext } from '@/context/Auth'
 import InfiniteScroll from 'react-infinite-scroll-component'
 import ForumPostCard from '@/components/forum/ForumPostCard'
-import Button from '@/components/Button'
 import { IoClose } from 'react-icons/io5'
 import { twMerge } from 'tailwind-merge'
 import { getFileType } from '@/utils/file'

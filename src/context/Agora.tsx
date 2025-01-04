@@ -1,4 +1,3 @@
-import { registerAgoraUserService } from '@/service/agoraService';
 import React, { createContext, useContext, ReactNode, useState } from 'react';
 
 interface AgoraContextType {
@@ -19,6 +18,7 @@ export const AgoraContextProvider: React.FC<AgoraProviderProps> = ({ children })
 
 	// Fetch conversations
 	const registerAgoraUser = (username: string) => {
+		console.log(username)
 		// registerAgoraUserService(username);
 	}
 	const updateAgoraUser = (userID: string) => {

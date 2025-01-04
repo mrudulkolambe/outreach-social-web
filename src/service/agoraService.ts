@@ -1,5 +1,3 @@
-import axios from "axios";
-import { endpoints } from "../config/endpoints";
 
 export interface AgoraChatToken {
 	chatToken: string;
@@ -9,6 +7,7 @@ export interface AgoraChatToken {
 }
 
 export const registerAgoraUserService = async (userID: string): Promise<void> => {
+	console.log(userID)
 	// try {
 	// 	const baseUrl = import.meta.env.VITE_AGORA_BASE_URL;
 	// 	const password = import.meta.env.VITE_AGORA_USER_PASSWORD;

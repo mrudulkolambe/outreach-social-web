@@ -4,11 +4,6 @@ import Topbar from '@/components/Topbar'
 import { getResourceCategories, getResources } from '@/service/resourceService';
 import { twMerge } from 'tailwind-merge';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import moment from 'moment';
-import { Navigation, Pagination } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import VideoComponent from '@/components/Video';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ResourcePostCard from '@/components/resource/ResourcePostCard';
 
 const ResourceHome = () => {

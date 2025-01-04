@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiResponse, getUser, updateUserData } from '../service/authService';
 import { postReq } from '../utils/api';
 import { endpoints } from '../config/endpoints';
-import { useAgoraContext } from './Agora';
 import { registerAgoraUserService } from '@/service/agoraService';
 
 interface AuthContextType {
@@ -28,7 +27,6 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   const { pathname } = useLocation();
   const [user, setUser] = useState<MainUser | null>(null);
   const [baseUser, setBaseUser] = useState<BaseUser | null>(null);
-  const { loginAgoraUser } = useAgoraContext();
   const handlePendingData = (currentUser: ApiResponse) => {
     if (currentUser.response?.username && currentUser.response?.name) {
       navigate("/")

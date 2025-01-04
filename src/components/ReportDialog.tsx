@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from './ui/dialog'
 
 const ReportDialog = ({ type, id, children }: { type: string, id: string, children: React.ReactElement }) => {
 	const [showDialog, setShowDialog] = useState(false)
+	console.log(type, id)
 	return (
 		<>
 			<span onClick={() => setShowDialog(true)}>{children}</span>

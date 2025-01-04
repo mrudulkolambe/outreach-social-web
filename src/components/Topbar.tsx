@@ -2,8 +2,7 @@ import { useAuthContext } from '@/context/Auth'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet'
-import Input from './Input'
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from './ui/sheet'
 // import { ConversationList } from 'chatuim2'
 
 const Topbar = () => {
