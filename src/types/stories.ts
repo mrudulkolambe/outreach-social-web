@@ -18,6 +18,7 @@ type UserStory = {
 	deleted: boolean;
 	createdAt: string;
 	updatedAt: string;
+	public: boolean;
 };
 
 type UploadStoryResponse = {

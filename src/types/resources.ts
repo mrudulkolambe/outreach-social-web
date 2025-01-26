@@ -5,6 +5,12 @@ type ResourceCategoryResponse = {
 	response: ResourceCategory[];
 }
 
+type ResourcePostResponse = {
+	success: boolean;
+	message: string;
+	response: ResourcePost | null;
+}
+
 type ResourceCategory = {
 	_id: string;
 	title: string;

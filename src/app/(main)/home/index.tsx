@@ -14,6 +14,7 @@ import Stories from 'react-insta-stories';
 import { getUserStories } from "@/service/storyService"
 import moment from "moment"
 import Topbar from "@/components/Topbar"
+import { DialogTitle } from "@/components/ui/post_dialog"
 
 const Home = () => {
 	const { posts, uploading, uploadProgress, loadMorePosts, hasMorePost, loading } = useFeedContext()
@@ -26,25 +27,38 @@ const Home = () => {
 		stories: emptyStories
 	})
 
-
 	function handleStories(stories: UserStory[]): UserStoryGroup[] {
 		const groupedMap: Record<string, UserStoryGroup> = {};
 
 		for (const story of stories) {
-			const username = story.userId.username;
-			const imageUrl = story.userId.imageUrl;
-			if (!groupedMap.hasOwnProperty(username)) {
-				groupedMap[username] = {
-					username: username,
-					stories: [],
-					imageUrl: imageUrl
-				};
+			if (story.public) {
+				// Group by username for public stories
+				const username = story.userId.username;
+				const imageUrl = story.userId.imageUrl;
+				if (!groupedMap.hasOwnProperty(username)) {
+					groupedMap[username] = {
+						username: username,
+						stories: [],
+						imageUrl: imageUrl,
+					};
+				}
+				groupedMap[username].stories.push(story);
+			} else {
+				// Group under "anonyms" for non-public stories
+				const anonymousGroupName = "anonymous";
+				if (!groupedMap.hasOwnProperty(anonymousGroupName)) {
+					groupedMap[anonymousGroupName] = {
+						username: anonymousGroupName,
+						stories: [],
+						imageUrl: "/icons/user-placeholder.svg", // No image for anonymous group
+					};
+				}
+				groupedMap[anonymousGroupName].stories.push(story);
 			}
-			groupedMap[username].stories.push(story);
 		}
-
 		return Object.values(groupedMap);
 	}
+
 
 	useEffect(() => {
 		if (user) {
@@ -67,6 +81,7 @@ const Home = () => {
 		}
 	}, [storyOpen.show, setStoryOpen]);
 
+	const [showAddStory, setShowAddStory] = useState(false)
 	return (
 		<RootLayout loading={loading}>
 			<Dialog open={storyOpen.show} onOpenChange={(e) => setStoryOpen({ ...storyOpen, show: e })}>
@@ -90,6 +105,12 @@ const Home = () => {
 					/>
 				</DialogContent>
 			</Dialog>
+			<Dialog open={showAddStory} onOpenChange={(e) => setShowAddStory(e)}>
+				<DialogContent>
+					<DialogTitle>Add Story</DialogTitle>
+
+				</DialogContent>
+			</Dialog>
 			<div className='flex flex-col'>
 				<Topbar />
 				<div className='flex items-center py-3 px-10 w-full h-[155px]'>
@@ -98,7 +119,7 @@ const Home = () => {
 						grabCursor
 						spaceBetween={20}
 					>
-						<SwiperSlide className='storycard-layout'>
+						{stories.own && <SwiperSlide className='storycard-layout'>
 							<div onClick={() => {
 								setStoryOpen({
 									show: true, stories: stories.own.map((story) => {
@@ -116,13 +137,13 @@ const Home = () => {
 							}} className='flex flex-col gap-2 items-center'>
 								<div className='flex flex-col h-[100px] w-[85px] bg-accent/20 rounded-lg items-center justify-center px-2 py-3 gap-3'>
 									<span className='h-6 w-6 p-0.5 bg-accent rounded-full flex items-center justify-center text-white'>
-										<Plus />
+										{/* <Plus /> */}
 									</span>
-									<p className='text-center leading-4 text-sm'>Add your story</p>
+									<p className='text-center leading-4 text-sm'>View your story</p>
 								</div>
 								<p>Your story</p>
 							</div>
-						</SwiperSlide>
+						</SwiperSlide>}
 						{
 							handleStories(stories.user).map((userStory) => {
 								return <SwiperSlide onClick={() => {
@@ -130,12 +151,13 @@ const Home = () => {
 										show: true,
 										stories: userStory.stories.map((story) => {
 											return {
+												public: story.public,
 												type: story.media.type,
 												url: story.media.url,
 												header: {
-													heading: story.userId.name,
+													heading: story.public ? story.userId.name : "Anonymous",
 													subheading: moment(story.createdAt).fromNow(),
-													profileImage: story.userId.imageUrl,
+													profileImage: story.public ? story.userId.imageUrl : "/icons/user-placeholder.svg",
 												},
 											}
 										})

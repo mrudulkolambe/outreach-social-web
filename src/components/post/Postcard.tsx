@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, EllipsisVertical } from "lucide-react";
 import { memo, ReactElement, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { GoHeart, GoComment, GoHeartFill } from "react-icons/go";
-import { getComments, likePost, postComments } from '../../service/postService';
+import { deletePost, getComments, likePost, postComments } from '../../service/postService';
 import { useFeedContext } from '../../context/Feed';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../ui/post_dialog';
 import { Dialog as DialogDefault, DialogContent as DialogContentDefault, DialogTitle as DialogTitleDefault, DialogDescription as DialogDescriptionDefault } from '../ui/post_dialog';
@@ -19,22 +19,33 @@ import { DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMen
 import { useAuthContext } from '@/context/Auth';
 import Input from '../Input';
 import Button from '../Button';
+import { createReport } from '@/service/reportService';
 
 const Postcard = memo(({ post }: { post: Post }) => {
 	const { baseUser } = useAuthContext()
 	const { updatePost } = useFeedContext();
 	const [isDialogOpen, setDialogOpen] = useState(false)
 	const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
-
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+	const [isDeleted, setIsDeleted] = useState(false)
+	const [deleteLoading, setDeleteLoading] = useState(false)
 	const [comments, setComments] = useState<FeedCommentsResponse | null>(null)
 	const [tempComments, setTempComments] = useState<FeedCommentsResponse | null>(null)
 	const [commentsLoading, setCommentsLoading] = useState(true)
 	const [postCommentLoading, setPostCommentLoading] = useState(false)
+	const [reportLoading, setReportLoading] = useState(false)
 	const [liked, setLiked] = useState({
 		liked: post.liked,
 		likeCount: post.likesCount
 	})
+	const reportReasons = [
+		"Reason 1",
+		"Reason 2",
+		"Reason 3",
+	]
 	const [commentText, setCommentText] = useState("")
+	const [reportReason, setReportReason] = useState("")
+	const [reportText, setReportText] = useState("")
 	const [showMore, setShowMore] = useState(false)
 	const handleLike = async () => {
 		let tempPost: Post = {
@@ -93,10 +104,49 @@ const Postcard = memo(({ post }: { post: Post }) => {
 			document.body.style.pointerEvents = "";
 		}
 	};
+	const handleDeleteOpenChange = (isOpen: boolean) => {
+		setIsDeleteDialogOpen(isOpen);
+		if (!isOpen) {
+			document.body.style.pointerEvents = "";
+		}
+	};
 
+	const handleDelete = async (e: React.FormEvent) => {
+		e.preventDefault()
+		setDeleteLoading(true)
+		await deletePost(post._id);
+		setIsDeleted(true)
+		setDeleteLoading(false)
+		setIsDeleteDialogOpen(false)
+	}
+
+	const handleReportSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+		if (reportText.length != 0 || reportReason.length != 0) {
+			setReportLoading(true)
+			const response = await createReport({
+				userID: baseUser?._id ?? "",
+				postId: post._id,
+				text: reportText,
+				reason: reportReason,
+				type: "post"
+			})
+			if (response == 200 || response == 201) {
+				toast.success("Post reported successfully");
+			} else {
+				toast.error("Something went wrong!, Please try again later");
+			}
+			setReportText("")
+			setReportReason("")
+			setReportLoading(false)
+			setIsReportDialogOpen(false)
+		}else{
+			toast.error("Please fill the report form completely!");;
+		}
+	}
 	return (
 		<>
-			<div className='px-7 flex flex-col pt-4'>
+			{!isDeleted && <div className='px-7 flex flex-col pt-4'>
 				<div className=' w-full flex items-center justify-between'>
 					<div className='flex gap-4 items-center'>
 						{
@@ -114,7 +164,7 @@ const Postcard = memo(({ post }: { post: Post }) => {
 						<DropdownMenuTrigger><span className='h-10 w-10 rounded-lg bg-black/5 flex items-center justify-center'><EllipsisVertical size={20} /></span></DropdownMenuTrigger>
 						<DropdownMenuContent className='w-[200px]'>
 							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base'>Edit</DropdownMenuItem>}
-							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base'>Delete</DropdownMenuItem>}
+							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base' onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>}
 							{baseUser?._id !== post.user._id && <DropdownMenuItem className='text-base' onClick={() => setIsReportDialogOpen(true)}>Report</DropdownMenuItem>}
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -226,19 +276,36 @@ const Postcard = memo(({ post }: { post: Post }) => {
 						</Dialog>
 					</div>
 				</div>
-			</div >
+			</div >}
 
 			<DialogDefault onOpenChange={handleOpenChange} open={isReportDialogOpen}>
 				<DialogContentDefault className='w-[30vw]'>
 					<DialogTitleDefault className='text-black text-xl font-bold'>Report Post</DialogTitleDefault>
 					<DialogDescriptionDefault >Are you sure you want to report the post?</DialogDescriptionDefault>
-					<div className='flex flex-wrap gap-x-4 gap-y-3'>
-						<div className='px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer'>Post reasons Test 0</div>
-						<div className='px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer'>Post reasons Test 1</div>
-						<div className='px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer'>Post reasons Test 2</div>
-					</div>
-					<Input textarea={true} id='report' onChange={() => { }} placeholder='Message' type='text' value={"asda"} />
-					<Button text='Submit' disabled={false} className='' loading={false} type='button' />
+					<form onSubmit={handleReportSubmit}>
+						<div className='flex flex-wrap gap-x-4 gap-y-3 mb-3'>
+							{
+								reportReasons.map((reason) => {
+									return <div onClick={() => setReportReason(reason)} key={reason} className={twMerge('px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer', reason === reportReason ? "bg-accent" : "bg-accent/70")}>{reason}</div>
+								})
+							}
+						</div>
+						<Input textarea={true} id='report' onChange={(e) => setReportText(e.target.value)} placeholder='Message' type='text' value={reportText} />
+						<Button text='Submit' disabled={reportLoading} className='' loading={reportLoading} type='submit' />
+					</form>
+				</DialogContentDefault>
+			</DialogDefault>
+
+			<DialogDefault onOpenChange={handleDeleteOpenChange} open={isDeleteDialogOpen}>
+				<DialogContentDefault className='w-[30vw]'>
+					<DialogTitleDefault className='text-black text-xl font-bold'>Delete Post</DialogTitleDefault>
+					<DialogDescriptionDefault >Are you sure you want to delete the post?</DialogDescriptionDefault>
+					<form onSubmit={handleDelete} className='grid grid-cols-2 items-center gap-x-4 justify-between'>
+						<button onClick={() => setIsDeleteDialogOpen(false)} type='button' className='text-accent border-accent button bg-transparent border-2'>
+							Cancel
+						</button>
+						<Button text='Proceed' disabled={deleteLoading} className='border-2 border-accent disabled:border-accent/50' loading={deleteLoading} type='submit' />
+					</form>
 				</DialogContentDefault>
 			</DialogDefault>
 		</>

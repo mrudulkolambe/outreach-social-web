@@ -2,18 +2,25 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { Navigation, Pagination } from 'swiper/modules';
 import VideoComponent from "../Video";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, EllipsisVertical } from "lucide-react";
 import { memo, ReactElement, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { GoHeart, GoComment, GoHeartFill } from "react-icons/go";
-import { getComments, likePost, postComments } from '@/service/forumService';
+import { deleteForumPost, getComments, likePost, postComments } from '@/service/forumService';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/post_dialog';
 import moment from 'moment';
 import { toast } from 'sonner';
 import { FaArrowUp } from 'react-icons/fa6';
+import { Dialog as DialogDefault, DialogContent as DialogContentDefault, DialogTitle as DialogTitleDefault, DialogDescription as DialogDescriptionDefault } from '../ui/post_dialog';
+import { createReport } from '@/service/reportService';
+import { useAuthContext } from '@/context/Auth';
+import Input from '../Input';
+import { DropdownMenuItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenu } from '../ui/dropdown-menu';
+import Button from '../Button';
 
 const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 	const [post, setPost] = useState(forumPost)
+	const { baseUser } = useAuthContext()
 	const handleLike = async () => {
 		let tempPost: ForumPost = {
 			_id: post._id,
@@ -69,17 +76,120 @@ const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 			});
 		}
 	}, [tempComments])
+
+	const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+	const [isDeleted, setIsDeleted] = useState(false)
+	const [reportLoading, setReportLoading] = useState(false)
+	const [deleteLoading, setDeleteLoading] = useState(false)
+	const [reportReason, setReportReason] = useState("")
+	const [reportText, setReportText] = useState("")
+	const handleOpenChange = (isOpen: boolean) => {
+		setIsReportDialogOpen(isOpen);
+		if (!isOpen) {
+			document.body.style.pointerEvents = "";
+		}
+	};
+	const handleDeleteOpenChange = (isOpen: boolean) => {
+		setIsDeleteDialogOpen(isOpen);
+		if (!isOpen) {
+			document.body.style.pointerEvents = "";
+		}
+	};
+
+	const handleDelete = async (e: React.FormEvent) => {
+		e.preventDefault()
+		setDeleteLoading(true)
+		await deleteForumPost(post._id);
+		setIsDeleted(true)
+		setDeleteLoading(false)
+		setIsDeleteDialogOpen(false)
+	}
+
+	const handleReportSubmit = async (e: React.FormEvent) => {
+		e.preventDefault()
+		if (reportText.length != 0 || reportReason.length != 0) {
+			setReportLoading(true)
+			const response = await createReport({
+				userID: baseUser?._id ?? "",
+				postId: post._id,
+				text: reportText,
+				reason: reportReason,
+				type: "forum"
+			})
+			if (response == 200 || response == 201) {
+				toast.success("Post reported successfully");
+			} else {
+				toast.error("Something went wrong!, Please try again later");
+			}
+			setReportText("")
+			setReportReason("")
+			setReportLoading(false)
+			setIsReportDialogOpen(false)
+		} else {
+			toast.error("Please fill the report form completely!");;
+		}
+	}
+	const reportReasons = [
+		"Reason 1",
+		"Reason 2",
+		"Reason 3",
+	]
 	return (
 		<>
-			<Dialog>
+			<DialogDefault onOpenChange={handleOpenChange} open={isReportDialogOpen}>
+				<DialogContentDefault className='w-[30vw]'>
+					<DialogTitleDefault className='text-black text-xl font-bold'>Report Post</DialogTitleDefault>
+					<DialogDescriptionDefault >Are you sure you want to report the post?</DialogDescriptionDefault>
+					<form onSubmit={handleReportSubmit}>
+						<div className='flex flex-wrap gap-x-4 gap-y-3 mb-3'>
+							{
+								reportReasons.map((reason) => {
+									return <div onClick={() => setReportReason(reason)} key={reason} className={twMerge('px-4 py-2 bg-accent/90 hover:bg-accent duration-150 text-white rounded-lg cursor-pointer', reason === reportReason ? "bg-accent" : "bg-accent/70")}>{reason}</div>
+								})
+							}
+						</div>
+						<Input textarea={true} id='report' onChange={(e) => setReportText(e.target.value)} placeholder='Message' type='text' value={reportText} />
+						<Button text='Submit' disabled={reportLoading} className='' loading={reportLoading} type='submit' />
+					</form>
+				</DialogContentDefault>
+			</DialogDefault>
+
+			<DialogDefault onOpenChange={handleDeleteOpenChange} open={isDeleteDialogOpen}>
+				<DialogContentDefault className='w-[30vw]'>
+					<DialogTitleDefault className='text-black text-xl font-bold'>Delete Post</DialogTitleDefault>
+					<DialogDescriptionDefault >Are you sure you want to delete the post?</DialogDescriptionDefault>
+					<form onSubmit={handleDelete} className='grid grid-cols-2 items-center gap-x-4 justify-between'>
+						<button onClick={() => setIsDeleteDialogOpen(false)} type='button' className='text-accent border-accent button bg-transparent border-2'>
+							Cancel
+						</button>
+						<Button text='Proceed' disabled={deleteLoading} className='border-2 border-accent disabled:border-accent/50' loading={deleteLoading} type='submit' />
+					</form>
+				</DialogContentDefault>
+			</DialogDefault>
+			{!isDeleted && <Dialog>
 				<div className='px-7 flex flex-col pt-4'>
-					<div className='flex gap-4 items-center'>
-						{
-							!post.public ?
-								<div className='h-[42px] w-[42px] bg-accent flex items-center justify-center text-center text-xl text-white rounded-full font-semibold'>A</div> :
-								<img src={post.user.imageUrl} className='h-[42px] w-[42px] rounded-full object-cover' />
-						}
-						<h4 className='font-medium'>{post.public ? post.user.name : "Anonymous"}</h4>
+					<div className='flex items-center justify-between'>
+						<div className='flex gap-4 items-center'>
+							{
+								!post.public ?
+									<div className='h-[42px] w-[42px] bg-accent flex items-center justify-center text-center text-xl text-white rounded-full font-semibold'>A</div> :
+									<img src={post.user.imageUrl} className='h-[42px] w-[42px] rounded-full object-cover' />
+							}
+							<h4 className='font-medium'>{post.public ? post.user.name : "Anonymous"}</h4>
+						</div>
+						<DropdownMenu onOpenChange={(e) => {
+							if (!e) {
+								document.body.style.pointerEvents = "";
+							}
+						}}>
+							<DropdownMenuTrigger><span className='h-10 w-10 rounded-lg bg-black/5 flex items-center justify-center'><EllipsisVertical size={20} /></span></DropdownMenuTrigger>
+							<DropdownMenuContent className='w-[200px]'>
+								{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base'>Edit</DropdownMenuItem>}
+								{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base' onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>}
+								{baseUser?._id !== post.user._id && <DropdownMenuItem className='text-base' onClick={() => setIsReportDialogOpen(true)}>Report</DropdownMenuItem>}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
 					<div className='mt-3 relative'>
 						{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
@@ -185,7 +295,7 @@ const ForumPostCard = memo(({ forumPost }: { forumPost: ForumPost }) => {
 						</div>
 					</div>
 				</DialogContent>
-			</Dialog>
+			</Dialog>}
 		</>
 	)
 })

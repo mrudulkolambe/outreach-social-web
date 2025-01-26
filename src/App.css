@@ -24,7 +24,7 @@ body {
 }
 
 .Poppins {
-  /* font-family: "Poppins" !important; */
+  font-family: "Poppins" !important;
 }
 
 @layer components {
@@ -151,4 +151,10 @@ img {
 
 body{
   pointer-events: all !important;
+}
+
+#zegoim{
+  font-family: 'Poppins' !important;
+  height: 100vh;
+  width: 100vw;
 }

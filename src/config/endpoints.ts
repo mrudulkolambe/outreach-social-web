@@ -13,6 +13,7 @@ export const endpoints = {
     'like-feed': `${baseURL}/feed/like`,
     'create-support': `${baseURL}/support/register`,
     'get-feed': `${baseURL}/feed/get`,
+    'delete-feed': `${baseURL}/feed/delete`,
 
     // FORUM
     'create-forum': `${baseURL}/forum`,
@@ -23,17 +24,20 @@ export const endpoints = {
     'get-forum-post': `${baseURL}/forum/forum-post`,
     'create-forum-post': `${baseURL}/forum/forum-post`,
     'like-forum-feed': `${baseURL}/forum/forum-post/like`,
+    'delete-forum-feed': `${baseURL}/forum/forum-post`,
 
     // FEED
     'create-feed-comment': `${baseURL}/feed-comment`,
     'get-feed-comments': `${baseURL}/feed-comment`,
     'create-forum-feed-comment': `${baseURL}/forum-feed-comment`,
     'get-forum-feed-comments': `${baseURL}/forum-feed-comment`,
-
+    
     // RESOURCE
     'get-resource-categories': `${baseURL}/resource-category/get`,
     'get-resources': `${baseURL}/resource/get`,
     'like-resource': `${baseURL}/resource/like`,
+    'delete-resource': `${baseURL}/resource/delete`,
+    'create-resource': `${baseURL}/resource/create`,
 
     // STORY
     'create-story': `${baseURL}/story/create`,
@@ -44,7 +48,17 @@ export const endpoints = {
     'all-users': `${baseURL}/user/get`,
     'query-users': `${baseURL}/user/search`,
 
+    // REPORT
+    'create-report': `${baseURL}/report/create`,
+
 
     // AGORA
-    'agora-chat-token': `${baseURL}/agora/chat/token`
+    'agora-chat-token': `${baseURL}/agora/chat/token`,
+
+    // ZEGO
+    'zego': `${baseURL}/zego/generate-token`,
+
+
+    // GLOBAL SEARCH
+    'global-search': `${baseURL}/user/global/search`
 };

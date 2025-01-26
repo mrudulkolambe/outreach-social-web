@@ -174,7 +174,7 @@ const Sidebar = ({
                 <DropdownMenuContent className="mt-0 p-0 border-none w-[--radix-popper-anchor-width] shadow-none">
                   <DropdownMenuItem className="w-full">Terms & Conditions</DropdownMenuItem>
                   <DropdownMenuItem className="w-full">Privacy Policy</DropdownMenuItem>
-                  <DropdownMenuItem className="w-full"><Link to={"/help-and-support"}>Help & Support</Link></DropdownMenuItem>
+                  <Link to={"/help-and-support"}>  <DropdownMenuItem className="w-full">Help & Support</DropdownMenuItem></Link>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

@@ -6,6 +6,8 @@ import { ApiResponse, getUser, updateUserData } from '../service/authService';
 import { postReq } from '../utils/api';
 import { endpoints } from '../config/endpoints';
 import { registerAgoraUserService } from '@/service/agoraService';
+import { initZIM, zim } from '@/utils/zim';
+import { ZIMConversation } from 'zego-zim-web';
 
 interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
@@ -14,6 +16,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   user: MainUser | null;
   baseUser: BaseUser | null;
+  conversations: ZIMConversation[]
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +29,7 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [user, setUser] = useState<MainUser | null>(null);
+  const [conversations, setConversations] = useState<ZIMConversation[]>([]);
   const [baseUser, setBaseUser] = useState<BaseUser | null>(null);
   const handlePendingData = (currentUser: ApiResponse) => {
     if (currentUser.response?.username && currentUser.response?.name) {
@@ -42,6 +46,12 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
         registerAgoraUserService(currentUser.response._id);
         setUser(currentUser.response); // Setting User object received from backend
         setBaseUser(currentUser.response); // Setting User object received from backend
+        await initZIM(currentUser.response._id, currentUser.response.username)
+        const convList = await zim.queryConversationList({
+          count: 10
+        })
+        console.log("ZEGO_CONV", convList)
+        setConversations(convList.conversationList)
         if (['/login', '/signup'].includes(pathname)) {
           handlePendingData(currentUser)
         } else if (pathname === "/") {
@@ -92,7 +102,7 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, user, createAcc, baseUser, updateUser }}>
+    <AuthContext.Provider value={{ login, logout, user, createAcc, baseUser, updateUser, conversations }}>
       {children}
     </AuthContext.Provider>
   );

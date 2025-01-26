@@ -1,5 +1,5 @@
 import { endpoints } from "../config/endpoints";
-import { getReq, patchReq, postReq } from "../utils/api";
+import { deleteReq, getReq, patchReq, postReq } from "../utils/api";
 
 export type GetPostsResponse = {
   success: boolean;
@@ -81,12 +81,25 @@ export const getComments = async (_id: String): Promise<FeedCommentsResponse | n
 }
 
 export const postComments = async (postID: string, text: string): Promise<FeedCommentResponse | null> => {
-  const body = {'text': text, 'parentID': null};
+  const body = { 'text': text, 'parentID': null };
   const response = await postReq(`${endpoints["create-feed-comment"]}/${postID}`, body)
-  if(response.ok){
+  if (response.ok) {
     const data = await response.json();
-    return data  as FeedCommentResponse;
-  }else{
+    return data as FeedCommentResponse;
+  } else {
     return null
+  }
+}
+
+export const deletePost = async (id: string): Promise<number> => {
+  try {
+    const deletePostResponse = await deleteReq(`${endpoints["delete-feed"]}/${id}`);
+    if (deletePostResponse.status === 200) {
+      return 200;
+    } else {
+      return 500;
+    }
+  } catch (error) {
+    return 500;
   }
 }

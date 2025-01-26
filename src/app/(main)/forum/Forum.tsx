@@ -103,6 +103,7 @@ const Forum = () => {
 	useEffect(() => {
 		fetchForum()
 	}, [_id])
+	
 	const removeFile = (index: number) => {
 		setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
 	};

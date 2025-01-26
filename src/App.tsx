@@ -13,9 +13,8 @@ import Username from './app/username';
 import ProfilePhoto from './app/profile-photo';
 import Interest from './app/interest';
 import Bio from './app/bio';
-// import ChatScreen from './app/(main)/chat';
-// import ChatNew from "./app/(main)/chat/chat"
-// import MessagingInit from './app/(main)/messaging/page';
+import ChatPage from './app/(main)/chat';
+import Chat from './app/(main)/chat/chat';
 
 
 function App() {
@@ -37,8 +36,9 @@ function App() {
             <Route path="/profile-photo" element={<ProfilePhoto />} />
             <Route path="/interest" element={<Interest />} />
             <Route path="/bio" element={<Bio />} />
-            {/* <Route path="/chat" element={<MessagingInit />} /> */}
-            {/* <Route path="/chat/new" element={<ChatNew />} /> */}
+            {/* <Route path="/chat" element={<ChatPage />} /> */}
+            <Route path="/chat" element={<Chat />} />
+
 
             {/* FORUM */}
             <Route path="/forum" element={<ForumHome />} />

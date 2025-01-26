@@ -1,5 +1,5 @@
 import { endpoints } from "../config/endpoints";
-import { getReq, patchReq, postReq } from "../utils/api";
+import { deleteReq, getReq, patchReq, postReq } from "../utils/api";
 
 interface ForumsResponse {
   success: boolean;
@@ -171,5 +171,18 @@ export const createForumPost = async (reqData: object, forumID: string): Promise
       message: "Failed to fetch",
       response: null,
     };
+  }
+}
+
+export const deleteForumPost = async (_id: string): Promise<number> => {
+  try {
+    const deletePostResponse = await deleteReq(`${endpoints["delete-forum-feed"]}/${_id}`);
+    if (deletePostResponse.status === 200) {
+      return 200;
+    } else {
+      return 500;
+    }
+  } catch (error) {
+    return 500;
   }
 }

@@ -1,5 +1,5 @@
 import { endpoints } from '@/config/endpoints';
-import { getReq, patchReq } from '@/utils/api';
+import { deleteReq, getReq, patchReq, postReq } from '@/utils/api';
 import { toast } from 'sonner';
 
 async function getResourceCategories(): Promise<ResourceCategoryResponse | null> {
@@ -41,6 +41,32 @@ async function likeResource(_id: string): Promise<Number> {
 	}
 }
 
+const deleteResource = async (_id: string): Promise<number> => {
+  try {
+	const deletePostResponse = await deleteReq(`${endpoints["delete-resource"]}/${_id}`);
+	if (deletePostResponse.status === 200) {
+	  return 200;
+	} else {
+	  return 500;
+	}
+  } catch (error) {
+	return 500;
+  }
+}
+
+export const createResourcePost = async (reqData: object): Promise<ResourcePostResponse | null> => {
+  try {
+	const response = await postReq(`${endpoints['create-resource']}`, reqData);
+	const data = await response.json();
+	return data
+  } catch (error) {
+	return {
+	  success: false,
+	  message: "Failed to fetch",
+	  response: null,
+	};
+  }
+}
 
 
-export { getResourceCategories, getResources, likeResource }
+export { getResourceCategories, getResources, likeResource, deleteResource }
