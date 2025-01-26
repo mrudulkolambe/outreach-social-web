@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useAuthContext } from "@/context/Auth";
 import { ZIM, ZIMConversation, ZIMMessage } from "zego-zim-web";
@@ -148,6 +148,7 @@ const Chat = () => {
 
 	const init = async () => {
 		zim.on("peerMessageReceived", function (zim, { messageList, fromConversationID }) {
+			console.log("peerMessageReceived_msglist", zim);
 			console.log("peerMessageReceived_msglist", messageList);
 			console.log("peerMessageReceived_currentConv", fromConversationID, currentChat?.conversationID);
 			setCurrentChatConv((prevChatConv) => {

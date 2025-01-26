@@ -1,5 +1,4 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Plus } from 'lucide-react'
 import 'swiper/css';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css/navigation';
@@ -12,7 +11,7 @@ import Topbar from '@/components/Topbar';
 import { twMerge } from 'tailwind-merge';
 import { useEffect, useState } from 'react';
 import interestsOptions, { InterestType } from '@/lib/interests';
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import Stories from 'react-insta-stories';
 import { getUserStories } from '@/service/storyService';
 import moment from 'moment';

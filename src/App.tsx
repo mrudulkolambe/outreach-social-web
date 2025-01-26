@@ -13,7 +13,6 @@ import Username from './app/username';
 import ProfilePhoto from './app/profile-photo';
 import Interest from './app/interest';
 import Bio from './app/bio';
-import ChatPage from './app/(main)/chat';
 import Chat from './app/(main)/chat/chat';
 
 

@@ -44,7 +44,3 @@ export const updateUserData = async (body: any): Promise<ApiResponse> => {
     };
   }
 };
-
-export const globalSearch = async (userID: string, query: string) => {
-  
-}

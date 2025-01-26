@@ -17,6 +17,7 @@ export const createReport = async (data: {
 			"type": data.type
 		});
 		const responseData = await response.json();
+		console.log(responseData)
 		return 200;
 	} catch (error) {
 		return 500;
