@@ -5,11 +5,13 @@ import { useForumContext } from '@/context/Forum'
 import { useAuthContext } from '@/context/Auth'
 import { Link } from 'react-router-dom'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/forum_dialog'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import interestsOptions from '@/lib/interests'
 import { SearchableDropdown } from '@/components/ui/searchable_dropdown'
 import { createForum } from '@/service/forumService'
 import Spinner from '@/components/spinner'
+import { Upload } from 'lucide-react'
+import { uploadSingleFile } from '@/service/uploadService'
 
 const ForumHome = () => {
 	const { forums } = useForumContext()
@@ -20,7 +22,7 @@ const ForumHome = () => {
 	const [desc, setDesc] = useState("")
 	const [category, setCategory] = useState<string>(interestsOptions[0].interest)
 	const [createForumLoading, setCreateForumLoading] = useState(false)
-
+	const [openCreateDialog, setOpenCreateDialog] = useState(false)
 
 	useEffect(() => {
 
@@ -30,18 +32,35 @@ const ForumHome = () => {
 	}, [])
 
 
+	const [forumImage, setForumImage] = useState<File | null>(null);
 	const handleCreateForum = async () => {
-		setCreateForumLoading(true)
-		const obj = {
-			'public': isPublic,
-			'name': name,
-			'category': category,
-			'description': desc,
-			'image': "https://outreachapps3bucket.s3.ap-south-1.amazonaws.com/forum/NKQP9Cv7uCRyJTpu4uUDio4oy2l2/c0e38ce9-55d8-4985-b7d2-ee6abb15cb08-Internet_20240704_101545_6.jpeg"
+		if (forumImage) {
+			setCreateForumLoading(true)
+			const forumImageURL = await uploadSingleFile({
+				file: forumImage,
+				type: 'jpeg'
+			}, `forum/${Date.now() + Math.random() * 1234234}`)
+			console.log(forumImageURL)
+			const obj = {
+				'public': isPublic,
+				'name': name,
+				'category': category,
+				'description': desc,
+				'image': forumImageURL?.media.url
+			}
+			await createForum(obj)
+			setCreateForumLoading(false)
+			setOpenCreateDialog(false)
 		}
-		await createForum(obj)
-		setCreateForumLoading(false)
 	}
+
+	const handleImageChange = (img: File) => {
+		if (img) {
+			const imageUrl = URL.createObjectURL(img);
+			return imageUrl
+		}
+	};
+	const forumImageRef = useRef<HTMLInputElement | null>(null);
 	return (
 		<RootLayout loading={loading}>
 			<div className='flex flex-col h-screen max-h-screen'>
@@ -82,7 +101,7 @@ const ForumHome = () => {
 							</div>
 						</div>
 						<div className='flex-1 flex flex-col col-span-3 items-end'>
-							<Dialog>
+							<Dialog onOpenChange={(e) => setOpenCreateDialog(e)} open={openCreateDialog}>
 								<DialogTrigger asChild>
 									<button className={twMerge('button w-max h-max', "py-2")}>New Forum</button>
 								</DialogTrigger>
@@ -91,6 +110,16 @@ const ForumHome = () => {
 										<DialogTitle className='text-2xl font-bold text-black'>Create Forum</DialogTitle>
 									</DialogHeader>
 									<div className="grid gap-4 py-4">
+										<div onClick={() => forumImageRef.current?.click()}>
+											<div className='cursor-pointer h-20 w-20 flex items-center justify-center rounded-full overflow-hidden bg-gray-100 border'>
+												{forumImage ? <img src={handleImageChange(forumImage)} className='h-20 w-20 ' /> : <Upload />}
+											</div>
+											<input ref={forumImageRef} onChange={(e) => {
+												if (e.target.files) {
+													setForumImage(e.target.files[0])
+												}
+											}} type='file' className='hidden' accept=".png,.jpg,.jpeg" />
+										</div>
 										<div className='flex flex-col gap-1'>
 											<label htmlFor="name">Forum name: </label>
 											<input onChange={(e) => setName(e.target.value)} value={name} className='input' id='name' />

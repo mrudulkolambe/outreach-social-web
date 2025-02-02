@@ -2,12 +2,14 @@ const baseURL = "https://outreach-backend-development.vercel.app";
 // const baseURL = "http://localhost:2000";
 
 // const uploadBaseURL = "http://localhost:8080";
-const uploadBaseURL = "http://15.207.14.199:8080";
+// const uploadBaseURL = "http://15.207.14.199:8080";
+const uploadBaseURL = "https://outreach-upload.vercel.app";
 
 export const endpoints = {
     'register-user': `${baseURL}/user/register`,
     'get-current-user': `${baseURL}/user/current-user`,
     'update-user': `${baseURL}/user/update`,
+    'search-user': `${baseURL}/user/profile`,
     'get-post': `${baseURL}/feed/get`,
     'create-post': `${baseURL}/feed/create`,
     'like-feed': `${baseURL}/feed/like`,

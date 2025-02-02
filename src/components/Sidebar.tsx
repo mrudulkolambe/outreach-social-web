@@ -21,8 +21,10 @@ import { getFileType } from "@/utils/file";
 
 const Sidebar = ({
   children,
+  collapsed,
 }: Readonly<{
   children?: React.ReactNode;
+  collapsed: boolean
 }>) => {
   const { pathname } = useLocation()
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -153,24 +155,24 @@ const Sidebar = ({
 
   return (
     <>
-      <aside className='w-[20vw] h-screen'>
+      <aside className={twMerge(' h-screen', collapsed ? "w-max" : "w-[20vw]")}>
         <div className='flex items-center px-9 h-[80px] w-full'>
           <Link to={"/"}><img src={"/assets/logo/logo.svg"} alt="" /></Link>
         </div>
-        <nav className='primary-height px-5 py-5 gap-2 flex flex-col border-t border-r justify-between'>
+        <nav className='primary-height px-5 py-5 gap-2 flex flex-col border-t border-r justify-between overflow-y-auto'>
           {
             children ? children : <div>
               {
                 routes.map((route) => {
                   if (route.action == "link") {
-                    return <Link key={route.url} className={twMerge('text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg', pathname == route.url ? "text-accent bg-accent/10" : "text-gray-500 ")} to={route.url}>{route.icon} {route.label}</Link>
+                    return <Link key={route.url} className={twMerge('text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg', pathname == route.url ? "text-accent bg-accent/10" : "text-gray-500 ")} to={route.url}>{route.icon} {!collapsed && route.label}</Link>
                   } else if (route.action === "button") {
-                    return <span key={route.url} className={twMerge('cursor-pointer text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg', pathname == route.url ? "text-accent bg-accent/10" : "text-gray-500 ")} onClick={() => setPostDialog(true)}>{route.icon} {route.label}</span>
+                    return <span key={route.url} className={twMerge('cursor-pointer text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg', pathname == route.url ? "text-accent bg-accent/10" : "text-gray-500 ")} onClick={() => setPostDialog(true)}>{route.icon} {!collapsed && route.label}</span>
                   }
                 })
               }
               <DropdownMenu open={settingsOpen} onOpenChange={(e) => setSettingsOpen(e)}>
-                <DropdownMenuTrigger className="w-full"><span key={settingsDropdown.url} className={twMerge('w-full cursor-pointer text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg')}>{settingsDropdown.icon} {settingsDropdown.label}</span></DropdownMenuTrigger>
+                <DropdownMenuTrigger className="w-full"><span key={settingsDropdown.url} className={twMerge('w-full cursor-pointer text-gray-500 rounded-lg flex items-center gap-3 py-3 hover:bg-accent/5 duration-100 px-4 text-lg')}>{settingsDropdown.icon} {!collapsed && settingsDropdown.label}</span></DropdownMenuTrigger>
                 <DropdownMenuContent className="mt-0 p-0 border-none w-[--radix-popper-anchor-width] shadow-none">
                   <DropdownMenuItem className="w-full">Terms & Conditions</DropdownMenuItem>
                   <DropdownMenuItem className="w-full">Privacy Policy</DropdownMenuItem>

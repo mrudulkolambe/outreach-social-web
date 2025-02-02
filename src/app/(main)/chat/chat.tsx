@@ -1,116 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
 import { useAuthContext } from "@/context/Auth";
 import { ZIM, ZIMConversation, ZIMMessage } from "zego-zim-web";
 import { sendMessage, zim, zp } from "@/utils/zim";
 import Avatar from "react-avatar";
-import { endpoints } from "@/config/endpoints";
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
-
-
-const ConversationList = ({
-	conversations,
-	onSelect,
-	onGlobalUserSelect,
-	baseUser
-}: {
-	conversations: ZIMConversation[];
-	onSelect: (chat: ZIMConversation) => void;
-	onGlobalUserSelect: (user: ZIMConversation) => void;
-	baseUser: BaseUser | null
-}) => {
-	const [search, setSearch] = useState("");
-	const [globalUsers, setGlobalUsers] = useState<ZIMConversation[]>([]);
-	const [loading, setLoading] = useState(false);
-
-	// Filter conversations based on search input
-	const filteredConversations = conversations.filter((conv) =>
-		conv.conversationName.toLowerCase().includes(search.toLowerCase())
-	);
-
-	// Fetch global users based on search input
-	useEffect(() => {
-		if (search.trim() === "") {
-			setGlobalUsers([]);
-			return;
-		}
-
-		const fetchGlobalUsers = async () => {
-			setLoading(true);
-			try {
-				const res = await axios.get(`${endpoints["global-search"]}?query=${search}&user=${baseUser?._id}`);
-				setGlobalUsers(res.data.response.map((item: BaseUser) => {
-					return {
-						conversationID: item._id,
-						conversationName: item.username
-					}
-				}) || []); // Assuming the API returns `users` array
-			} catch (error) {
-				console.error("Error fetching global users:", error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		const debounceTimeout = setTimeout(fetchGlobalUsers, 300); // Debounce API calls by 300ms
-		return () => clearTimeout(debounceTimeout); // Clear timeout if search changes quickly
-	}, [search]);
-
-	return (
-		<div className="h-full bg-gray-100 p-4 border-r">
-			{/* Search Input */}
-			<div className="mb-4">
-				<input
-					type="text"
-					value={search}
-					onChange={(e) => setSearch(e.target.value)}
-					placeholder="Search..."
-					className="w-full px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-				/>
-			</div>
-
-			{/* Filtered Conversations */}
-			<ul className="space-y-2">
-				{filteredConversations.map((conv) => (
-					<li
-						key={conv.conversationID}
-						onClick={() => onSelect(conv)}
-						className="p-3 bg-white rounded-lg cursor-pointer hover:bg-blue-100 shadow-sm"
-					>
-						<div className="font-semibold">{conv.conversationName}</div>
-					</li>
-				))}
-			</ul>
-
-			{/* Divider */}
-			{search && (
-				<div className="my-4 text-gray-500 text-sm text-center">Search Results</div>
-			)}
-
-			{/* Global Users */}
-			<ul className="space-y-2">
-				{loading ? (
-					<p className="text-gray-500 text-center">Searching...</p>
-				) : (
-					globalUsers.map((user) => (
-						<li
-							key={user.conversationID}
-							onClick={() => onGlobalUserSelect(user)}
-							className="p-3 bg-white rounded-lg cursor-pointer hover:bg-green-100 shadow-sm"
-						>
-							<div className="font-semibold">{user.conversationName}</div>
-							<div className="text-sm text-gray-500">{user.conversationID}</div>
-						</li>
-					))
-				)}
-			</ul>
-		</div>
-	);
-};
+import ConversationList from "./convList";
+import moment from "moment";
+import { Phone, Video } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
+import { useSearchParams } from "react-router-dom";
 
 
 const Chat = () => {
 	const { conversations, baseUser } = useAuthContext();
+	const [searchParams] = useSearchParams();
+	const user = searchParams.get("user");
 	const [input, setInput] = useState("");
 	const [currentChat, setCurrentChat] = useState<ZIMConversation | null>(null);
 	const [currentChatConv, setCurrentChatConv] = useState<ZIMMessage[]>([]);
@@ -127,7 +31,14 @@ const Chat = () => {
 	};
 
 	useEffect(() => {
-		if (currentChat) {
+		if (user) {
+			const userData = conversations.find((userItem) => {
+				return userItem.conversationID === user;
+			})
+			if (userData) {
+				setCurrentChat(userData);
+			}
+		} else if (currentChat) {
 			init();
 			zim.queryHistoryMessage(currentChat?.conversationID, ZIM.ConversationType.Peer, {
 				count: 30,
@@ -143,7 +54,7 @@ const Chat = () => {
 			};
 		}
 
-	}, [currentChat])
+	}, [currentChat, user])
 
 
 	const init = async () => {
@@ -160,7 +71,8 @@ const Chat = () => {
 		});
 	};
 
-	const handleSendMessage = async () => {
+	const handleSendMessage = async (e: React.FormEvent) => {
+		e.preventDefault()
 		if (input.trim() && currentChat) {
 			const message = await sendMessage(currentChat.conversationID, input);
 			if (message) {
@@ -219,6 +131,7 @@ const Chat = () => {
 
 	return (
 		<div className="flex h-screen bg-gray-100">
+			<Sidebar collapsed={true} />
 			{/* Sidebar */}
 			<div className="w-1/4 h-full">
 				<ConversationList
@@ -226,6 +139,7 @@ const Chat = () => {
 					onSelect={handleConversationSelect}
 					onGlobalUserSelect={handleGlobalUserSelect}
 					baseUser={baseUser}
+					fetchGlobal={true}
 				/>
 			</div>
 
@@ -243,34 +157,42 @@ const Chat = () => {
 						)}
 						{currentChat ? currentChat.conversationName : ""}
 					</div>
-					<div onClick={inviteVideo}>Video</div>
-					<div onClick={inviteVoice}>Voice</div>
+					<div className="flex gap-14">
+						<div className="bg-gray-300 flex items-center justify-center cursor-pointer h-10 w-10 rounded-full" onClick={inviteVoice}><Phone /></div>
+						<div className="bg-gray-300 flex items-center justify-center cursor-pointer h-10 w-10 rounded-full" onClick={inviteVideo}><Video /></div>
+					</div>
 				</header>
 
 				{currentChat ? (
 					<div className="flex flex-col flex-1 overflow-y-auto">
 						<div key={currentChat.conversationID} className="flex-grow overflow-y-auto p-6 space-y-4">
 							{currentChatConv.map((msg, index) => {
-								return <div
-									key={index}
-									className={`flex ${msg.direction === 0 ? "justify-end" : "justify-start"
-										}`}
-								>
-									<div
-										className={`max-w-xs px-4 py-2 rounded-xl shadow-md ${msg.direction === 0
-											? "bg-blue-500 text-white"
-											: "bg-gray-200 text-black"
-											}`}
-									>
-										<p className="text-base">{msg.message}</p>
+								const message = msg as ZIMMessage;
+								const text = msg?.message as string || ""; // Ensure `msg.message` is always a string
+
+								return (
+									<div key={index} className={`flex flex-col ${msg.direction === 0 ? "items-end" : "items-start"}`}>
+										<div className={`max-w-xs px-4 py-2 rounded-xl shadow-md ${message.direction === 0 ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}>
+											{msg.type == 11 ? (
+												// @ts-ignore
+												<img src={msg?.fileDownloadUrl} alt="Sent media" height={msg?.largeImageHeight ?? 0} width={msg?.largeImageWidth ?? 0} className="object-cover rounded-lg" />
+											) : msg.type == 12 ? (
+												<video src={msg?.fileDownloadUrl} controls className="w-[500px] h-[250px] rounded-lg" />
+											) : (
+												<p className="text-base">{text}</p>
+											)}
+										</div>
+										<p className="text-xs mt-2">{moment(msg.timestamp).format("hh:mm")}</p>
 									</div>
-								</div>
+								);
 							})}
+
+
 							<div ref={messagesEndRef}></div>
 						</div>
 
 						{/* Message Input */}
-						<div className="p-4 bg-white border-t flex items-center space-x-4">
+						<form onSubmit={handleSendMessage} className="p-4 bg-white border-t flex items-center space-x-4">
 							<input
 								type="text"
 								value={input}
@@ -279,12 +201,12 @@ const Chat = () => {
 								className="flex-grow px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
 							/>
 							<button
-								onClick={handleSendMessage}
+								type="submit"
 								className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
 							>
 								Send
 							</button>
-						</div>
+						</form>
 					</div>
 				) : (
 					<div className="flex-grow flex items-center justify-center">

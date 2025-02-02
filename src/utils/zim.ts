@@ -85,7 +85,6 @@ export const sendMessage = async (toUserID: string, message: string) => {
     const zimMessage = await zim.sendMessage(msg, toUserID, ZIM.ConversationType.Peer, {
       priority: ZIM.MessagePriority.High,
     });
-
     return zimMessage.message;
   } catch (err) {
     console.error("Error sending message:", err);

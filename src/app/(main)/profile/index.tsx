@@ -16,11 +16,17 @@ import Stories from 'react-insta-stories';
 import { getUserStories } from '@/service/storyService';
 import moment from 'moment';
 import Storycard from '@/components/Storycard';
+import { useParams } from 'react-router-dom';
+import { getUserByID } from '@/service/authService';
 
 const Profile = () => {
   const { user, baseUser } = useAuthContext()
   const [interests, setInterests] = useState<InterestType[]>([])
   const [stories, setStories] = useState<StoryResponse>({ own: [], user: [] });
+  const [searchedUser, setSearchedUser] = useState<BaseUser | null>(null)
+  const [loading, setLoading] = useState(true);
+  const params = useParams();
+  console.log(params);
   let emptyStories: any[] = []
   const [storyOpen, setStoryOpen] = useState({
     show: false,
@@ -61,16 +67,16 @@ const Profile = () => {
 
 
   useEffect(() => {
-    if (user) {
+    if (user && user._id != params._id) {
       initStories()
     }
   }, [user])
 
   const initStories = async () => {
     let stories = await getUserStories();
-    console.log("STORIES", stories)
     if (stories) {
       setStories(stories.response)
+      setLoading(false)
     }
   }
 
@@ -82,16 +88,33 @@ const Profile = () => {
   }, [storyOpen.show, setStoryOpen]);
 
   useEffect(() => {
-    if (baseUser?.interest) {
-      const pickedInterests = baseUser.interest.map((interest) => {
+    if (searchedUser?.interest) {
+      const pickedInterests = searchedUser.interest.map((interest) => {
         return interestsOptions.find((item) => item.interest === interest);
       }) as InterestType[]
       setInterests(pickedInterests)
     }
-  }, [baseUser])
+  }, [searchedUser])
+
+  useEffect(() => {
+    setSearchedUser(baseUser);
+    setLoading(false)
+    if (baseUser?._id != params._id) {
+      fetchUserData()
+    }
+  }, [params, baseUser])
+
+  const fetchUserData = async () => {
+    if (params && params._id && baseUser) {
+      setLoading(true)
+      const user = await getUserByID(params._id as string, baseUser?._id as string);
+      setSearchedUser(user.response);
+      setLoading(false)
+    }
+  }
 
   return (
-    <RootLayout>
+    <RootLayout loading={loading}>
       <Dialog open={storyOpen.show} onOpenChange={(e) => setStoryOpen({ ...storyOpen, show: e })}>
         <DialogContent>
           <Stories
@@ -119,19 +142,19 @@ const Profile = () => {
           <div className='w-[80vw] px-10 py-5 overflow-y-auto scrollbar'>
             <div className='flex items-center justify-between'>
               <div className='w-1/3'>
-                <img className='h-[80px] w-[80px] rounded-full object-cover' src={user?.imageUrl} alt="" />
+                <img className='h-[80px] w-[80px] rounded-full object-cover' src={searchedUser?.imageUrl} alt="" />
               </div>
               <div className='w-1/3 grid grid-cols-3 gap-4'>
                 <div className='text-xl flex flex-col items-center justify-center'>
-                  <h3 className='font-bold'>12</h3>
+                  <h3 className='font-bold'>{searchedUser?.feedCount || 0}</h3>
                   <p className='font-semibold'>Posts</p>
                 </div>
                 <div className='text-xl flex flex-col items-center justify-center'>
-                  <h3 className='font-bold'>{baseUser?.followers || 0}</h3>
+                  <h3 className='font-bold'>{searchedUser?.followers || 0}</h3>
                   <p className='font-semibold'>Followers</p>
                 </div>
                 <div className='text-xl flex flex-col items-center justify-center'>
-                  <h3 className='font-bold'>{baseUser?.following || 0}</h3>
+                  <h3 className='font-bold'>{searchedUser?.following || 0}</h3>
                   <p className='font-semibold'>Following</p>
                 </div>
               </div>
@@ -142,12 +165,12 @@ const Profile = () => {
             </div>
 
             <div className='flex flex-col mt-2'>
-              <h1 className='text-xl font-bold'>{user?.name}</h1>
-              <span className='mt-1 px-3 py-0.5 rounded-full bg-accent/20 w-max'>@{user?.username}</span>
-              <p className='mt-2 max-w-[60%]'>{user?.bio}</p>
+              <h1 className='text-xl font-bold'>{searchedUser?.name}</h1>
+              <span className='mt-1 px-3 py-0.5 rounded-full bg-accent/20 w-max'>@{searchedUser?.username}</span>
+              <p className='mt-2 max-w-[60%]'>{searchedUser?.bio}</p>
             </div>
 
-            <div className='mt-5'>
+            <div className={params._id ? "hidden" : 'mt-5'}>
               <h2 className='text-xl font-semibold'>Stories</h2>
               <div className='mt-3'>
                 <Swiper
@@ -205,6 +228,13 @@ const Profile = () => {
                     })
                   }
                 </Swiper>
+              </div>
+            </div>
+
+            <div className={'mt-5'}>
+              <h2 className='text-xl font-semibold'>Reward Points</h2>
+              <div className='mt-3'>
+                <h3>Reward Points: {searchedUser?.rewardPoints}</h3>
               </div>
             </div>
 

@@ -9,8 +9,10 @@ type MainUser = {
 type BaseUser = MainUser & {
     followers: number;
     following: number;
+    feedCount: number;
     interest: string[];
     feeds: Post[];
+    rewardPoints: number;
 };
 
 type Media = {

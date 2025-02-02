@@ -25,6 +25,24 @@ export const getUser = async (): Promise<ApiResponse> => {
   }
 };
 
+export const getUserByID = async (id: string, userID: string): Promise<ApiResponse> => {
+  try {
+    const response = await getReq(`${endpoints["search-user"]}/${id}/${userID}`);
+    const data = await response.json();
+    return {
+      success: true,
+      message: "User fetched successfully",
+      response: data.response,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to fetch",
+      response: null,
+    };
+  }
+};
+
 export const updateUserData = async (body: any): Promise<ApiResponse> => {
   try {
     const response = await patchReq(endpoints["update-user"], body);

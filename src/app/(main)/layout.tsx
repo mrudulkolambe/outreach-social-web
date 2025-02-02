@@ -11,7 +11,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<main className="flex w-screen h-screen mulish relative">
-			<Sidebar children={sidebar} />
+			<Sidebar children={sidebar} collapsed={false}/>
 			<section className="w-[80vw] h-screen">
 				{children}
 			</section>
