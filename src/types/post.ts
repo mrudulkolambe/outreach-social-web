@@ -13,6 +13,7 @@ type BaseUser = MainUser & {
     interest: string[];
     feeds: Post[];
     rewardPoints: number;
+    isFollowing?: boolean;
 };
 
 type Media = {

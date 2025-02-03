@@ -59,7 +59,7 @@ const Topbar = () => {
 		<div className='border-b h-[80px] w-full flex items-center justify-end px-9 gap-5'>
 			<div className='flex relative'>
 				<input id='search' onFocus={() => setShowSuggestions(true)} onChange={(e) => setSearch(e.currentTarget.value)} placeholder='Search...' type='text' value={search} className='w-[20vw] px-4 py-2 bg-black/5 rounded-lg border-2' />
-				{showSuggestions && <div ref={suggestionRef} className='z-50 h-56 overflow-y-auto absolute top-full mt-2 w-[20vw] right-0 rounded-lg shadow-xl p-3 flex flex-col gap-3'>
+				{showSuggestions && <div ref={suggestionRef} className='bg-white z-50 h-56 overflow-y-auto absolute top-full mt-2 w-[20vw] right-0 rounded-lg shadow-xl p-3 flex flex-col gap-3'>
 					{
 						globalUsers.map((user) => {
 							return <Link to={`/user/${user._id}`} key={user._id} className='cursor-pointer bg-white rounded-lg p-2 flex gap-2'>

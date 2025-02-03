@@ -1,5 +1,5 @@
 import { endpoints } from "../config/endpoints";
-import { getReq, patchReq } from "../utils/api";
+import { getReq, patchReq, postReq } from "../utils/api";
 
 export interface ApiResponse {
   success: boolean;
@@ -62,3 +62,23 @@ export const updateUserData = async (body: any): Promise<ApiResponse> => {
     };
   }
 };
+
+export const followUser = async (userID: string, id: string): Promise<ApiResponse> => {
+  try {
+    const response = await postReq(`${endpoints["follow"]}/${userID}/${id}`, {});
+
+    const data = await response.json();
+    console.log(data)
+    return {
+      success: true,
+      message: "User updated successfully",
+      response: data.response,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to fetch",
+      response: null,
+    };
+  }
+}

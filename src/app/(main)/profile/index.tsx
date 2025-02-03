@@ -16,8 +16,8 @@ import Stories from 'react-insta-stories';
 import { getUserStories } from '@/service/storyService';
 import moment from 'moment';
 import Storycard from '@/components/Storycard';
-import { useParams } from 'react-router-dom';
-import { getUserByID } from '@/service/authService';
+import { useNavigate, useParams } from 'react-router-dom';
+import { followUser, getUserByID } from '@/service/authService';
 
 const Profile = () => {
   const { user, baseUser } = useAuthContext()
@@ -26,6 +26,7 @@ const Profile = () => {
   const [searchedUser, setSearchedUser] = useState<BaseUser | null>(null)
   const [loading, setLoading] = useState(true);
   const params = useParams();
+  const navigate = useNavigate()
   console.log(params);
   let emptyStories: any[] = []
   const [storyOpen, setStoryOpen] = useState({
@@ -63,6 +64,14 @@ const Profile = () => {
       }
     }
     return Object.values(groupedMap);
+  }
+
+  async function followUserFunction() {
+    if (params._id && user) {
+      console.log("CALLED")
+      await followUser(params?._id as string, user?._id as string);
+      navigate(0);
+    }
   }
 
 
@@ -159,9 +168,11 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className='opacity-0 pointer-events-none w-1/3 flex justify-end'>
-                <Button disabled={true} text='Create Post' type='button' loading={false} className='w-max py-2 h-max' />
-              </div>
+              {params._id && <div className='opacity-100 w-1/3 flex justify-end'>
+                <span onClick={followUserFunction}>
+                  <Button disabled={false} text={!searchedUser?.isFollowing ? 'Follow' : "Unfollow"} type='button' loading={false} className='w-max py-2 h-max' />
+                </span>
+              </div>}
             </div>
 
             <div className='flex flex-col mt-2'>

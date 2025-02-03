@@ -12,10 +12,12 @@ export const endpoints = {
     'search-user': `${baseURL}/user/profile`,
     'get-post': `${baseURL}/feed/get`,
     'create-post': `${baseURL}/feed/create`,
+    'update-post': `${baseURL}/feed/update`,
     'like-feed': `${baseURL}/feed/like`,
     'create-support': `${baseURL}/support/register`,
     'get-feed': `${baseURL}/feed/get`,
     'delete-feed': `${baseURL}/feed/delete`,
+    'follow': `${baseURL}/follow`,
 
     // FORUM
     'create-forum': `${baseURL}/forum`,

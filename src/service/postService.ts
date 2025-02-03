@@ -57,6 +57,18 @@ export const createPost = async (content: string, urls: UploadedFile[], isPublic
   }
 }
 
+export const updateFeedPost = async (id: string, data: object): Promise<number> => {
+  try {
+    const response = await patchReq(`${endpoints['update-post']}/${id}`, {
+      updateData: data
+    });
+    await response.json()
+    return 200
+  } catch (error) {
+    return 500
+  }
+}
+
 export const likePost = async (post: Post) => {
   try {
     const response = await patchReq(`${endpoints['like-feed']}/${post._id}`, {});

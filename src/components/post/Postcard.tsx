@@ -3,11 +3,10 @@ import 'swiper/css';
 import { Navigation, Pagination } from 'swiper/modules';
 import VideoComponent from "../Video";
 import { ChevronLeft, ChevronRight, EllipsisVertical } from "lucide-react";
-import { memo, ReactElement, useEffect, useState } from "react";
+import { ChangeEvent, memo, ReactElement, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { GoHeart, GoComment, GoHeartFill } from "react-icons/go";
-import { deletePost, getComments, likePost, postComments } from '../../service/postService';
-import { useFeedContext } from '../../context/Feed';
+import { deletePost, getComments, likePost, postComments, updateFeedPost } from '../../service/postService';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../ui/post_dialog';
 import { Dialog as DialogDefault, DialogContent as DialogContentDefault, DialogTitle as DialogTitleDefault, DialogDescription as DialogDescriptionDefault } from '../ui/post_dialog';
 import moment from 'moment';
@@ -20,10 +19,15 @@ import { useAuthContext } from '@/context/Auth';
 import Input from '../Input';
 import Button from '../Button';
 import { createReport } from '@/service/reportService';
+import interestsOptions from '@/lib/interests';
+import { IoClose } from 'react-icons/io5';
+import { getFileType } from '@/utils/file';
+import { useNavigate } from 'react-router-dom';
+import { useFeedContext } from '@/context/Feed';
 
 const Postcard = memo(({ post }: { post: Post }) => {
 	const { baseUser } = useAuthContext()
-	const { updatePost } = useFeedContext();
+	const {updatePost} = useFeedContext()
 	const [isDialogOpen, setDialogOpen] = useState(false)
 	const [isReportDialogOpen, setIsReportDialogOpen] = useState(false)
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -140,12 +144,167 @@ const Postcard = memo(({ post }: { post: Post }) => {
 			setReportReason("")
 			setReportLoading(false)
 			setIsReportDialogOpen(false)
-		}else{
+		} else {
 			toast.error("Please fill the report form completely!");;
 		}
 	}
+
+	const navigate = useNavigate()
+
+	const postInputRef = useRef<HTMLInputElement | null>(null);
+	const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+	const [postDialog, setPostDialog] = useState<{show: Boolean, data: object | null}>({show: false, data: null})
+	const [isPublic, setIsPublic] = useState(true)
+	const [content, setContent] = useState("")
+	const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
+
+	const handleFileChangePost = (event: ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			const files = Array.from(event.target.files);
+			const fileArray = files.map((file) => ({
+				file,
+				type: getFileType(file)
+			}));
+			setSelectedFiles((prevFiles) => prevFiles.concat(fileArray));
+		}
+	}
+
+	const [hashTags, setHashTags] = useState(interestsOptions.map((interest) => interest.tag));
+	const [filteredTags, setFilteredTags] = useState(hashTags);
+
+	const removeFilePost = (index: number) => {
+		setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+	};
+
+	const renderPreviewsPost = (source: SelectedFile[]) => {
+		return source.map((item, index) => {
+			const fileUrl = URL.createObjectURL(item.file);
+			return <div className="flex relative" key={index}>
+				<button type="button" className="absolute h-5 w-5 bg-white flex items-center justify-center rounded-full top-1 right-1" onClick={() => removeFilePost(index)}><IoClose /></button>
+				{item.type === 'png' || item.type === 'jpg' || item.type === 'jpeg' ? (
+					<img className="h-20 aspect-video object-cover" src={fileUrl} alt="preview" onLoad={() => URL.revokeObjectURL(fileUrl)} />
+				) : (
+					<video className="h-20 aspect-video object-cover" controls controlsList="noremoteplayback">
+						<source src={fileUrl} type={item.file.type} />
+						Your browser does not support the video tag.
+					</video>
+				)}
+			</div>
+		});
+	};
+
+	const [cursorY, setCursorY] = useState(20); // Y-position of the cursor
+	const [showSuggestions, setShowSuggestions] = useState(false);
+
+	useEffect(() => {
+		setHashTags(interestsOptions.map((interest) => interest.tag))
+		const handleCursorTracking = () => {
+			const inputRect = postInputRef.current?.getBoundingClientRect();
+			if (inputRect) {
+				setCursorY(inputRect.top + inputRect.height); // Position below the input field
+			}
+		};
+
+		window.addEventListener("resize", handleCursorTracking);
+		window.addEventListener("scroll", handleCursorTracking);
+
+		return () => {
+			window.removeEventListener("resize", handleCursorTracking);
+			window.removeEventListener("scroll", handleCursorTracking);
+		};
+	}, []);
+
+	const handleInputChange = (content: string) => {
+		setContent(content);
+
+		const hashIndex = content.lastIndexOf("#");
+
+		if (hashIndex !== -1) {
+			const searchText = content.substring(hashIndex + 1);
+			const filtered = hashTags.filter((tag) =>
+				tag.toLowerCase().startsWith(searchText.toLowerCase())
+			);
+			setFilteredTags(filtered);
+			setShowSuggestions(true);
+		} else {
+			setShowSuggestions(false);
+		}
+	};
+
+
+	const handleTagSelection = (tag: string) => {
+		const lastHashIndex = content.lastIndexOf("#");
+		const newText =
+			content.substring(0, lastHashIndex) + `#${tag} `; // Replace text after the last #
+		setContent(newText);
+		setShowSuggestions(false);
+	};
+
+	const { user } = useAuthContext()
 	return (
 		<>
+
+			{postDialog.show && <div className='fixed h-screen w-screen bg-black/50 z-20 top-0 left-0 flex items-center justify-center'>
+				<form className='w-[56vw] h-[65vh] bg-white rounded-xl py-5 px-8'>
+					<div className='flex items-center justify-between'>
+						<h1 className='text-2xl font-bold'>Share your post</h1>
+						<span onClick={() => setPostDialog({ show: false, data: null })} className='h-6 w-6 rounded-md bg-accent/10 flex items-center justify-center hover:bg-accent/20 duration-100 cursor-pointer'>
+							<IoClose />
+						</span>
+					</div>
+					<div className='mt-2 flex gap-3 items-center'>
+						<img className='h-[80px] w-[80px] rounded-full object-cover' src={user?.imageUrl} alt="" />
+						<div>
+							<h3 className='text-lg font-semibold'>{user?.name}</h3>
+							<div className='flex items-center gap-3 mt-2'>
+								<button onClick={() => setIsPublic(true)} type="button" className={twMerge('text-sm px-3 py-1 rounded-lg', isPublic ? "bg-accent text-white" : "text-black bg-accent/20 hover:bg-accent/10 ")}>Public</button>
+								<button onClick={() => setIsPublic(false)} type="button" className={twMerge('text-sm px-3 py-1 rounded-lg', !isPublic ? "bg-accent text-white" : "text-black bg-accent/20 hover:bg-accent/10 ")}>Private</button>
+							</div>
+							<input ref={postInputRef} type="file" hidden multiple accept=".png,.jpg,.jpeg,.mov,.mp4" onChange={handleFileChangePost} />
+						</div>
+					</div>
+
+					<div className="relative h-[55%]">
+						<textarea value={content} ref={textAreaRef} onChange={(e) => handleInputChange(e.target.value)} className="bg-accent/5 px-4 py-2 rounded-lg resize-none scrollbar outline-none border-0 flex-1 mt-3 w-full h-full" placeholder="What's on your mind?"></textarea>
+						{showSuggestions && (
+							<div
+								className="absolute left-0 right-0 z-50 w-full bg-white border border-gray-300 rounded-md shadow-lg"
+								style={{
+									top: `${cursorY}px`, // Dynamic positioning below the cursor
+								}}
+							>
+								<div className="max-h-48 overflow-auto flex flex-col-reverse">
+									{filteredTags.map((tag, index) => (
+										<div
+											key={index}
+											className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+											onClick={() => handleTagSelection(tag)}
+										>
+											#{tag}
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+					</div>
+					<div className="h-24 result flex gap-2 flex-wrap">{renderPreviewsPost(selectedFiles)}</div>
+					<div className="items-center flex justify-end">
+						{/* <button onClick={() => postInputRef.current?.click()} type="button" className="flex items-center justify-center text-accent text-sm bg-accent/10 px-3 py-1 rounded-lg"><File className="h-3 w-3" />&nbsp; Upload Photos/Videos</button> */}
+						<button onClick={async () => {
+							setPostDialog({ show: false, data: null });
+							const status = await updateFeedPost(post._id, {
+								...postDialog.data! as object,
+								content: content
+							});
+							if (status == 200) {
+								setSelectedFiles([]);
+								setContent("")
+							}
+							navigate(0)
+						}} type="button" className="flex items-center justify-center text-white text-sm bg-accent px-6 py-2 rounded-lg">Post</button>
+					</div>
+				</form>
+			</div>}
 			{!isDeleted && <div className='px-7 flex flex-col pt-4'>
 				<div className=' w-full flex items-center justify-between'>
 					<div className='flex gap-4 items-center'>
@@ -163,7 +322,10 @@ const Postcard = memo(({ post }: { post: Post }) => {
 					}}>
 						<DropdownMenuTrigger><span className='h-10 w-10 rounded-lg bg-black/5 flex items-center justify-center'><EllipsisVertical size={20} /></span></DropdownMenuTrigger>
 						<DropdownMenuContent className='w-[200px]'>
-							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base'>Edit</DropdownMenuItem>}
+							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base' onClick={() => {
+								setPostDialog({show: true, data: post})
+								setContent(post.content)
+							}}>Edit</DropdownMenuItem>}
 							{baseUser?._id === post.user._id && <DropdownMenuItem className='text-base' onClick={() => setIsDeleteDialogOpen(true)}>Delete</DropdownMenuItem>}
 							{baseUser?._id !== post.user._id && <DropdownMenuItem className='text-base' onClick={() => setIsReportDialogOpen(true)}>Report</DropdownMenuItem>}
 						</DropdownMenuContent>
