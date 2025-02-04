@@ -81,6 +81,7 @@ const Topbar = () => {
 				<SheetContent className='px-0'>
 					<SheetHeader>
 						<SheetTitle className='text-2xl px-6'>Chat</SheetTitle>
+						<Link to={"/chat"} className='text-accent underline text-sm font-semibold px-6'>Go to chat</Link>
 						<div className='flex flex-col gap-2 border-black/20'>
 							<ConversationList fetchGlobal={false} conversations={conversations} baseUser={baseUser} onGlobalUserSelect={() => { }} onSelect={handleConversationSelect} />
 						</div>

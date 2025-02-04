@@ -168,11 +168,11 @@ const Profile = () => {
                 </div>
               </div>
 
-              {params._id && <div className='opacity-100 w-1/3 flex justify-end'>
+               <div className={params._id  ? 'opacity-100 w-1/3 flex justify-end' : 'opacity-100 w-1/3'}>
                 <span onClick={followUserFunction}>
                   <Button disabled={false} text={!searchedUser?.isFollowing ? 'Follow' : "Unfollow"} type='button' loading={false} className='w-max py-2 h-max' />
                 </span>
-              </div>}
+              </div>
             </div>
 
             <div className='flex flex-col mt-2'>
