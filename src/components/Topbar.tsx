@@ -1,28 +1,18 @@
 import { useAuthContext } from '@/context/Auth'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet'
-import ConversationList from '@/app/(main)/chat/convList'
-import { ZIMConversation } from 'zego-zim-web'
 import axios from 'axios'
 import { endpoints } from '@/config/endpoints'
 import Avatar from 'react-avatar'
 import { useClickOutside } from "react-haiku"
 
 const Topbar = () => {
-	const { user, conversations, baseUser } = useAuthContext()
+	const { user, baseUser } = useAuthContext()
 	const [search, setSearch] = useState("")
-	const navigate = useNavigate()
 	const [globalUsers, setGlobalUsers] = useState<SearchUser[]>([]);
 	const [loading, setLoading] = useState(false);
 	const suggestionRef = useRef<HTMLDivElement | null>(null)
-
-
-	const handleConversationSelect = (chat: ZIMConversation) => {
-		navigate(`/chat?user=${chat.conversationID}`)
-	};
-
 	// Fetch global users based on search input
 	useEffect(() => {
 		if (search.trim() === "") {
