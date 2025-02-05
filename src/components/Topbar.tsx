@@ -74,20 +74,9 @@ const Topbar = () => {
 					{globalUsers.length == 0 && <p>No results!</p>}
 				</div>}
 			</div>
-			<Sheet>
-				<SheetTrigger>
-					<IoChatbubbleEllipsesOutline className='h-6 w-6 cursor-pointer' />
-				</SheetTrigger>
-				<SheetContent className='px-0'>
-					<SheetHeader>
-						<SheetTitle className='text-2xl px-6'>Chat</SheetTitle>
-						<Link to={"/chat"} className='text-accent underline text-sm font-semibold px-6'>Go to chat</Link>
-						<div className='flex flex-col gap-2 border-black/20'>
-							<ConversationList fetchGlobal={false} conversations={conversations} baseUser={baseUser} onGlobalUserSelect={() => { }} onSelect={handleConversationSelect} />
-						</div>
-					</SheetHeader>
-				</SheetContent>
-			</Sheet>
+
+			<Link to={"/chat"} ><IoChatbubbleEllipsesOutline className='h-6 w-6 cursor-pointer' /></Link>
+
 			{loading && ""}
 			<Link to={"/profile"}>
 				{
