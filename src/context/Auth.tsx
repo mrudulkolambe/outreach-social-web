@@ -46,18 +46,35 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
         registerAgoraUserService(currentUser.response._id);
         setUser(currentUser.response); // Setting User object received from backend
         setBaseUser(currentUser.response); // Setting User object received from backend
-        await initZIM(currentUser.response._id, currentUser.response.username)
-        const convList = await zim.queryConversationList({
-          count: 10
-        })
-        console.log("ZEGO_CONV", convList)
-        setConversations(convList.conversationList)
-        if (['/login', '/signup'].includes(pathname)) {
-          handlePendingData(currentUser)
-        } else if (pathname === "/") {
-          console.log("USER", currentUser.response)
-          if (!currentUser.response?.username && !currentUser.response?.name) {
-            navigate("/username")
+        const isInitialized = await initZIM(currentUser.response._id, currentUser.response.username)
+        if (isInitialized) {
+          const convList = await zim.queryConversationList({
+            count: 40
+          })
+          console.log("ZEGO_CONV", convList)
+          setConversations(convList.conversationList)
+          if (['/login', '/signup'].includes(pathname)) {
+            handlePendingData(currentUser)
+          } else if (pathname === "/") {
+            console.log("USER", currentUser.response)
+            if (!currentUser.response?.username && !currentUser.response?.name) {
+              navigate("/username")
+            }
+          }
+        } else {
+          await initZIM(currentUser.response._id, currentUser.response.username)
+          const convList = await zim.queryConversationList({
+            count: 40
+          })
+          console.log("ZEGO_CONV", convList)
+          setConversations(convList.conversationList)
+          if (['/login', '/signup'].includes(pathname)) {
+            handlePendingData(currentUser)
+          } else if (pathname === "/") {
+            console.log("USER", currentUser.response)
+            if (!currentUser.response?.username && !currentUser.response?.name) {
+              navigate("/username")
+            }
           }
         }
       } else {

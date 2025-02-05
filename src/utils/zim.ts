@@ -23,19 +23,20 @@ export const initZIM = async (userID: string, userName: string) => {
         const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
           appID,
           token,
-           userID,
+          userID,
           userID,
           userName
         );
 
-        zp = await ZegoUIKitPrebuilt.create(kitToken);
+        zp = ZegoUIKitPrebuilt.create(kitToken);
         zp.addPlugins({ ZIM });
       })
 
-
     console.info("ZIM and ZegoUIKitPrebuilt initialized successfully.");
+    return true
   } catch (err) {
     console.error("Error initializing ZIM or ZegoUIKitPrebuilt:", err);
+    return false
   }
 };
 
