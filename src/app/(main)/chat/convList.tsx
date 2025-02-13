@@ -9,12 +9,14 @@ const ConversationList = ({
 	onGlobalUserSelect,
 	baseUser,
 	fetchGlobal,
+	isLoading,
 }: {
 	conversations: ZIMConversation[];
 	onSelect: (chat: ZIMConversation) => void;
 	onGlobalUserSelect: (user: ZIMConversation) => void;
 	baseUser: BaseUser | null,
 	fetchGlobal: boolean,
+	isLoading: boolean,
 }) => {
 	const [search, setSearch] = useState("");
 	const [globalUsers, setGlobalUsers] = useState<ZIMConversation[]>([]);
@@ -72,7 +74,16 @@ const ConversationList = ({
 
 			{/* Filtered Conversations */}
 			<ul className="space-y-2">
-				{filteredConversations.map((conv) => (
+				{isLoading ? (
+					<div className="flex flex-col gap-3">
+						{[1, 2, 3].map((i) => (
+							<li key={i} className="p-3 bg-white rounded-lg animate-pulse">
+								<div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+								<div className="h-3 bg-gray-100 rounded w-1/2"></div>
+							</li>
+						))}
+					</div>
+				) : filteredConversations.map((conv) => (
 					<li
 						key={conv.conversationID}
 						onClick={() => onSelect(conv)}

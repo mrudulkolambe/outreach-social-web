@@ -6,19 +6,59 @@ import Avatar from "react-avatar";
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import ConversationList from "./convList";
 import moment from "moment";
-import { Phone, Video } from "lucide-react";
+import { ArrowLeft, Phone, Video } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import { useSearchParams } from "react-router-dom";
 
-
 const Chat = () => {
-	const { conversations, baseUser } = useAuthContext();
+	const { conversations, baseUser, setConversations } = useAuthContext();
 	const [searchParams] = useSearchParams();
 	const user = searchParams.get("user");
 	const [input, setInput] = useState("");
 	const [currentChat, setCurrentChat] = useState<ZIMConversation | null>(null);
 	const [currentChatConv, setCurrentChatConv] = useState<ZIMMessage[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [showConversations, setShowConversations] = useState(true);
 	const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+	useEffect(() => {
+		const handleResize = () => {
+			// Show conversations list by default on desktop
+			if (window.innerWidth >= 1024) {
+				setShowConversations(true);
+			}
+		};
+
+		window.addEventListener('resize', handleResize);
+		handleResize(); // Initial check
+
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
+	useEffect(() => {
+		// Hide conversations list on mobile when chat is selected
+		if (currentChat && window.innerWidth < 1024) {
+			setShowConversations(false);
+		}
+	}, [currentChat]);
+
+	useEffect(() => {
+		const initializeChat = async () => {
+			setIsLoading(true);
+			try {
+				const convList = await zim.queryConversationList({
+					count: 40
+				});
+				setConversations(convList.conversationList);
+			} catch (error) {
+				console.error("Error fetching conversations:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		initializeChat();
+	}, []);
 
 	useEffect(() => {
 		scrollToBottom(); // Scroll to the bottom whenever messages update
@@ -78,6 +118,17 @@ const Chat = () => {
 			if (message) {
 				setCurrentChatConv([...currentChatConv, message!])
 				setInput("");
+
+				// Check if this conversation exists in the conversations list
+				const existingConv = conversations.find(conv => conv.conversationID === currentChat.conversationID);
+				if (!existingConv) {
+					// If it doesn't exist, add it to the conversations list
+					const newConversation: ZIMConversation = {
+						...currentChat,
+						lastMessage: message
+					};
+					setConversations([...conversations, newConversation]);
+				}
 			}
 		}
 	};
@@ -91,6 +142,11 @@ const Chat = () => {
 			conversationID: user.conversationID,
 			conversationName: user.conversationName
 		} as ZIMConversation)
+	};
+
+	const handleBack = () => {
+		setShowConversations(true);
+		setCurrentChat(null);
 	};
 
 	function inviteVideo() {
@@ -128,93 +184,120 @@ const Chat = () => {
 		}
 	}
 
-
 	return (
 		<div className="flex h-screen bg-gray-100">
-			<Sidebar collapsed={true} />
-			{/* Sidebar */}
-			<div className="w-1/4 h-full">
-				<ConversationList
-					conversations={conversations}
-					onSelect={handleConversationSelect}
-					onGlobalUserSelect={handleGlobalUserSelect}
-					baseUser={baseUser}
-					fetchGlobal={true}
-				/>
-			</div>
+			<Sidebar collapsed={false}/>
 
-			{/* Chat Section */}
-			<div className="flex-1 flex flex-col ">
-				<header className="bg-[#D9D9D94D] text-black text-lg font-bold py-5 px-6 shadow-lg Poppins gap-3 flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						{currentChat && (
-							<Avatar
-								name={currentChat?.conversationName}
-								size={"35"}
-								round
-								textSizeRatio={2}
+			{/* Main Chat Container */}
+			<div className="flex-1 flex relative h-full">
+				{/* Conversation List - Hidden on mobile when chat is active */}
+				<div className={`${showConversations ? 'flex' : 'hidden'} lg:flex absolute lg:relative inset-0 lg:inset-auto w-full lg:w-[350px] h-full bg-white z-10 border-r border-gray-200`}>
+					<div className="w-full h-full flex flex-col">
+						<header className="bg-[#D9D9D94D] text-black text-lg font-bold py-3 px-3 sm:py-5 sm:px-6 shadow-lg Poppins">
+							<h1 className="text-xl font-bold">Messages</h1>
+						</header>
+						<div className="flex-1 overflow-hidden">
+							<ConversationList
+								conversations={conversations}
+								onSelect={handleConversationSelect}
+								onGlobalUserSelect={handleGlobalUserSelect}
+								baseUser={baseUser}
+								fetchGlobal={true}
+								isLoading={isLoading}
 							/>
-						)}
-						{currentChat ? currentChat.conversationName : ""}
-					</div>
-					<div className="flex gap-14">
-						<div className="bg-gray-300 flex items-center justify-center cursor-pointer h-10 w-10 rounded-full" onClick={inviteVoice}><Phone /></div>
-						<div className="bg-gray-300 flex items-center justify-center cursor-pointer h-10 w-10 rounded-full" onClick={inviteVideo}><Video /></div>
-					</div>
-				</header>
-
-				{currentChat ? (
-					<div className="flex flex-col flex-1 overflow-y-auto">
-						<div key={currentChat.conversationID} className="flex-grow overflow-y-auto p-6 space-y-4">
-							{currentChatConv.map((msg, index) => {
-								const message = msg as ZIMMessage;
-								const text = msg?.message as string || ""; // Ensure `msg.message` is always a string
-
-								return (
-									<div key={index} className={`flex flex-col ${msg.direction === 0 ? "items-end" : "items-start"}`}>
-										<div className={`max-w-xs px-4 py-2 rounded-xl shadow-md ${message.direction === 0 ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}>
-											{msg.type == 11 ? (
-												// @ts-ignore
-												<img src={msg?.fileDownloadUrl} alt="Sent media" height={msg?.largeImageHeight ?? 0} width={msg?.largeImageWidth ?? 0} className="object-cover rounded-lg" />
-											) : msg.type == 12 ? (
-												<video src={msg?.fileDownloadUrl} controls className="w-[500px] h-[250px] rounded-lg" />
-											) : (
-												<p className="text-base">{text}</p>
-											)}
-										</div>
-										<p className="text-xs mt-2">{moment(msg.timestamp).format("hh:mm")}</p>
-									</div>
-								);
-							})}
-
-
-							<div ref={messagesEndRef}></div>
 						</div>
+					</div>
+				</div>
 
-						{/* Message Input */}
-						<form onSubmit={handleSendMessage} className="p-4 bg-white border-t flex items-center space-x-4">
-							<input
-								type="text"
-								value={input}
-								onChange={(e) => setInput(e.target.value)}
-								placeholder="Type a message..."
-								className="flex-grow px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-							/>
-							<button
-								type="submit"
-								className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
-							>
-								Send
-							</button>
-						</form>
-					</div>
-				) : (
-					<div className="flex-grow flex items-center justify-center">
-						<p className="text-gray-500 text-lg">
-							Select a conversation to start chatting
-						</p>
-					</div>
-				)}
+				{/* Chat Section */}
+				<div className={`${!showConversations ? 'flex' : 'hidden'} lg:flex flex-1 flex-col bg-white h-full`}>
+					<header className="bg-[#D9D9D94D] text-black py-3 px-3 sm:py-5 sm:px-6 shadow-lg Poppins flex items-center justify-between">
+						<div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+							{/* Back button - visible only on mobile when chat is active */}
+							{currentChat && (
+								<button
+									onClick={handleBack}
+									className="lg:hidden p-1.5 hover:bg-gray-200 rounded-full"
+								>
+									<ArrowLeft size={20} className="sm:size-6" />
+								</button>
+							)}
+							{currentChat && (
+								<Avatar
+									name={currentChat?.conversationName}
+									size="32"
+									round
+									textSizeRatio={2}
+									className="sm:size-9 flex-shrink-0"
+								/>
+							)}
+							<span className="truncate text-base sm:text-lg font-semibold">
+								{currentChat ? currentChat.conversationName : ""}
+							</span>
+						</div>
+						{currentChat && (
+							<div className="flex gap-3 sm:gap-14 ml-2 flex-shrink-0">
+								<button
+									className="bg-gray-300 flex items-center justify-center cursor-pointer h-8 w-8 sm:h-10 sm:w-10 rounded-full hover:bg-gray-400 transition-colors"
+									onClick={inviteVoice}
+								>
+									<Phone size={16} className="sm:size-5" />
+								</button>
+								<button
+									className="bg-gray-300 flex items-center justify-center cursor-pointer h-8 w-8 sm:h-10 sm:w-10 rounded-full hover:bg-gray-400 transition-colors"
+									onClick={inviteVideo}
+								>
+									<Video size={16} className="sm:size-5" />
+								</button>
+							</div>
+						)}
+					</header>
+
+					{currentChat ? (
+						<div className="flex flex-col flex-1 overflow-hidden">
+							<div key={currentChat.conversationID} className="flex-grow overflow-y-auto p-4 sm:p-6 space-y-4">
+								{currentChatConv.map((msg, index) => {
+									const message = msg as ZIMMessage;
+									const text = msg?.message as string || "";
+
+									return (
+										<div key={index} className={`flex flex-col ${msg.direction === 0 ? "items-end" : "items-start"}`}>
+											<div className={`max-w-[75%] sm:max-w-xs px-3 py-2 sm:px-4 rounded-xl shadow-md ${message.direction === 0 ? "bg-blue-500 text-white" : "bg-gray-200 text-black"}`}>
+												<p className="text-sm sm:text-base break-words">{text}</p>
+											</div>
+											<p className="text-[10px] sm:text-xs mt-1 sm:mt-2 text-gray-500">{moment(msg.timestamp).format("hh:mm")}</p>
+										</div>
+									);
+								})}
+								<div ref={messagesEndRef}></div>
+							</div>
+
+							{/* Message Input */}
+							<form onSubmit={handleSendMessage} className="p-3 sm:p-4 bg-white border-t flex items-center gap-2 sm:gap-4">
+								<input
+									type="text"
+									value={input}
+									onChange={(e) => setInput(e.target.value)}
+									placeholder="Type a message..."
+									className="flex-grow px-3 py-2 sm:px-4 border rounded-full text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+								/>
+								<button
+									type="submit"
+									disabled={!input.trim()}
+									className="bg-blue-500 text-white px-3 py-2 sm:px-4 rounded-full hover:bg-blue-600 text-sm sm:text-base whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+								>
+									Send
+								</button>
+							</form>
+						</div>
+					) : (
+						<div className="flex-grow flex items-center justify-center p-4 text-center">
+							<p className="text-gray-500 text-base sm:text-lg">
+								Select a conversation to start chatting
+							</p>
+						</div>
+					)}
+				</div>
 			</div>
 		</div>
 	);

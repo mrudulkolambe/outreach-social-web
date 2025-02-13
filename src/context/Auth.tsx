@@ -16,7 +16,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   user: MainUser | null;
   baseUser: BaseUser | null;
-  conversations: ZIMConversation[]
+  conversations: ZIMConversation[];
+  setConversations: React.Dispatch<React.SetStateAction<ZIMConversation[]>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -119,7 +120,7 @@ export const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) =
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, user, createAcc, baseUser, updateUser, conversations }}>
+    <AuthContext.Provider value={{ login, logout, user, createAcc, baseUser, updateUser, conversations, setConversations }}>
       {children}
     </AuthContext.Provider>
   );

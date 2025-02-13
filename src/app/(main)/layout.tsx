@@ -10,14 +10,20 @@ export default function RootLayout({
 	loading?: boolean;
 }>) {
 	return (
-		<main className="flex w-screen h-screen mulish relative">
+		<main className="flex flex-col md:flex-row w-screen h-screen mulish relative overflow-hidden">
 			<Sidebar children={sidebar} collapsed={false}/>
-			<section className="w-[80vw] h-screen">
+			<section className="flex-1 w-full md:w-[calc(100vw-20vw)] h-[calc(100vh-64px)] md:h-screen pb-16 md:pb-0">
 				{children}
 			</section>
-			<div className={loading ? "flex items-center justify-center backdrop-blur bg-black/30 h-screen w-screen fixed top-0 left-0 z-50 opacity-100 duration-200" : "pointer-events-none flex items-center justify-center backdrop-blur-0 loading h-screen w-screen fixed top-0 left-0 z-50 opacity-0 duration-200"}>
-				<div className="overflow-hidden h-[100px] w-[100px] rounded-lg flex items-center justify-center shadow-xl">
-					<img className="object-fill" src="/assets/logo/main.gif" alt="" />
+			<div 
+				className={`flex items-center justify-center backdrop-blur fixed inset-0 z-50 transition-all duration-200 ${
+					loading 
+						? "bg-black/30 opacity-100 pointer-events-auto" 
+						: "bg-transparent opacity-0 pointer-events-none"
+				}`}
+			>
+				<div className="overflow-hidden h-[80px] w-[80px] sm:h-[100px] sm:w-[100px] rounded-lg flex items-center justify-center shadow-xl bg-white">
+					<img className="object-contain w-full h-full p-2" src="/assets/logo/main.gif" alt="Loading..." />
 				</div>
 			</div>
 		</main>

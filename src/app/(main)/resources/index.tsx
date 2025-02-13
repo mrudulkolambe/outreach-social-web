@@ -161,14 +161,14 @@ const ResourceHome = () => {
     <RootLayout>
       <div className='flex flex-col h-screen max-h-screen'>
         <Topbar />
-        <div className='grid grid-cols-12 py-3 px-10 w-full bg-white primary-height overflow-hidden'>
-          <div className='col-span-12 h-full'>
+        <div className='flex flex-col w-full bg-white primary-height overflow-hidden p-3 sm:p-4 lg:px-10'>
+          <div className='w-full h-full flex flex-col'>
             {/* Category Filter */}
-            <div className='w-full flex border-b-2 overflow-x-auto no-scrollbar'>
+            <div className='w-full flex border-b-2 overflow-x-auto scrollbar-none pb-1'>
               <span
                 onClick={() => handleCategoryChange("all")}
                 className={twMerge(
-                  'min-w-36 flex items-center justify-center px-8 py-3 cursor-pointer border-b-2',
+                  'whitespace-nowrap flex items-center justify-center px-4 sm:px-8 py-2 sm:py-3 cursor-pointer border-b-2 text-sm sm:text-base',
                   selectedCategory === "all"
                     ? 'border-blue-500 text-blue-600 font-medium'
                     : 'border-transparent hover:border-gray-200'
@@ -181,7 +181,7 @@ const ResourceHome = () => {
                   key={category._id}
                   onClick={() => handleCategoryChange(category._id)}
                   className={twMerge(
-                    'min-w-36 flex items-center justify-center px-8 py-3 cursor-pointer border-b-2',
+                    'whitespace-nowrap flex items-center justify-center px-4 sm:px-8 py-2 sm:py-3 cursor-pointer border-b-2 text-sm sm:text-base',
                     selectedCategory === category._id
                       ? 'border-blue-500 text-blue-600 font-medium'
                       : 'border-transparent hover:border-gray-200'
@@ -192,10 +192,112 @@ const ResourceHome = () => {
               ))}
             </div>
 
+            {/* Mobile Create Post Button */}
+            <div className='lg:hidden w-full flex justify-end mt-3'>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className='button w-max h-max py-2 px-4'>New Post</button>
+                </DialogTrigger>
+                <DialogContent className="w-[95vw] sm:w-[80vw] lg:w-[50vw] max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className='text-xl sm:text-2xl font-bold text-black'>Create Post</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className='flex flex-col gap-1'>
+                      <label htmlFor="name" className="text-sm sm:text-base">Title: </label>
+                      <input
+                        onChange={(e) => setTitle(e.target.value)}
+                        value={title}
+                        className='input text-sm sm:text-base'
+                        id='name'
+                        placeholder="Enter post title"
+                      />
+                    </div>
+                    <div className='hidden flex-col gap-1'>
+                      <label className="text-sm sm:text-base">Post type: </label>
+                      <div className='w-max flex gap-3'>
+                        <button
+                          type="button"
+                          onClick={() => setIsPublic(true)}
+                          className={twMerge(
+                            'button px-3 py-1 text-sm w-max',
+                            isPublic ? "" : "bg-gray-400 text-white"
+                          )}
+                        >
+                          Public
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsPublic(false)}
+                          className={twMerge(
+                            'button px-3 py-1 text-sm w-max',
+                            !isPublic ? "" : "bg-gray-400 text-white"
+                          )}
+                        >
+                          Private
+                        </button>
+                      </div>
+                    </div>
+                    <div className='flex flex-col gap-1'>
+                      <label className="text-sm sm:text-base">Category: </label>
+                      <select
+                        value={postCategory}
+                        onChange={(e) => setPostCategory(e.target.value)}
+                        className='input text-sm sm:text-base'
+                      >
+                        <option value="">Select a category</option>
+                        {resourceCategories.map(category => (
+                          <option key={category._id} value={category._id}>
+                            {category.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className='flex flex-col gap-1'>
+                      <label htmlFor='desc' className="text-sm sm:text-base">Description: </label>
+                      <textarea
+                        onChange={(e) => setContent(e.target.value)}
+                        value={content}
+                        id="desc"
+                        placeholder="Write your post content..."
+                        className='input h-24 sm:h-32 resize-none text-sm sm:text-base'
+                      />
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {renderPreviews(selectedFiles)}
+                    </div>
+                    <TextButton 
+                      text='Upload Media' 
+                      type='button' 
+                      className='text-accent text-xs sm:text-sm font-semibold underline' 
+                      onClick={() => inputRef.current?.click()} 
+                    />
+                    <div className="flex justify-end items-center">
+                      <input
+                        ref={inputRef}
+                        type="file"
+                        hidden
+                        multiple
+                        accept=".png,.jpg,.jpeg,.mov,.mp4"
+                        onChange={handleFileChange}
+                      />
+                      <button
+                        onClick={createPost}
+                        className='button py-2 sm:py-3 px-6 sm:px-8 h-max text-sm sm:text-base'
+                        disabled={uploading || !title.trim() || !content.trim() || !postCategory}
+                      >
+                        {uploading ? <Spinner /> : "Create"}
+                      </button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             {/* Resource Posts */}
-            <div className='grid grid-cols-12 mt-4'>
+            <div className='flex flex-col lg:flex-row gap-4 mt-4 h-full'>
               <div
-                className='max-h-[80vh] min-h-[80vh] w-full px-5 overflow-y-auto scrollbar col-span-8'
+                className='flex-1 max-h-[calc(100vh-220px)] lg:max-h-[calc(100vh-180px)] overflow-y-auto scrollbar'
                 id="resource-feed"
               >
                 <InfiniteScroll
@@ -226,28 +328,29 @@ const ResourceHome = () => {
                 </InfiniteScroll>
               </div>
 
-              {/* Create Post Dialog */}
-              <div className='col-span-4 h-full hidden lg:flex items-start justify-end'>
+              {/* Desktop Create Post Dialog */}
+              <div className='hidden lg:flex w-80 flex-shrink-0'>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button className={twMerge('button w-max h-max py-2')}>New Post</button>
+                    <button className='button w-max h-max py-2 px-4'>New Post</button>
                   </DialogTrigger>
-                  <DialogContent className="w-[50vw]">
+                  <DialogContent className="w-[95vw] sm:w-[80vw] lg:w-[50vw] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle className='text-2xl font-bold text-black'>Create Post</DialogTitle>
+                      <DialogTitle className='text-xl sm:text-2xl font-bold text-black'>Create Post</DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className='flex flex-col gap-1'>
-                        <label htmlFor="name">Title: </label>
+                        <label htmlFor="name" className="text-sm sm:text-base">Title: </label>
                         <input
                           onChange={(e) => setTitle(e.target.value)}
                           value={title}
-                          className='input'
+                          className='input text-sm sm:text-base'
                           id='name'
+                          placeholder="Enter post title"
                         />
                       </div>
                       <div className='hidden flex-col gap-1'>
-                        <label>Post type: </label>
+                        <label className="text-sm sm:text-base">Post type: </label>
                         <div className='w-max flex gap-3'>
                           <button
                             type="button"
@@ -272,11 +375,11 @@ const ResourceHome = () => {
                         </div>
                       </div>
                       <div className='flex flex-col gap-1'>
-                        <label>Category: </label>
+                        <label className="text-sm sm:text-base">Category: </label>
                         <select
                           value={postCategory}
                           onChange={(e) => setPostCategory(e.target.value)}
-                          className='input'
+                          className='input text-sm sm:text-base'
                         >
                           <option value="">Select a category</option>
                           {resourceCategories.map(category => (
@@ -287,19 +390,25 @@ const ResourceHome = () => {
                         </select>
                       </div>
                       <div className='flex flex-col gap-1'>
-                        <label htmlFor='desc'>Description: </label>
+                        <label htmlFor='desc' className="text-sm sm:text-base">Description: </label>
                         <textarea
                           onChange={(e) => setContent(e.target.value)}
                           value={content}
                           id="desc"
-                          className='input h-32 resize-none'
+                          placeholder="Write your post content..."
+                          className='input h-24 sm:h-32 resize-none text-sm sm:text-base'
                         />
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         {renderPreviews(selectedFiles)}
                       </div>
-                      <TextButton text='Upload Media' type='button' className='text-accent text-xs font-semibold underline' onClick={() => inputRef.current?.click()} />
-                      <div className="flex justify-between items-center">
+                      <TextButton 
+                        text='Upload Media' 
+                        type='button' 
+                        className='text-accent text-xs sm:text-sm font-semibold underline' 
+                        onClick={() => inputRef.current?.click()} 
+                      />
+                      <div className="flex justify-end items-center">
                         <input
                           ref={inputRef}
                           type="file"
@@ -310,8 +419,8 @@ const ResourceHome = () => {
                         />
                         <button
                           onClick={createPost}
-                          className='button py-3 mt-3 h-max px-8'
-                          disabled={uploading}
+                          className='button py-2 sm:py-3 px-6 sm:px-8 h-max text-sm sm:text-base'
+                          disabled={uploading || !title.trim() || !content.trim() || !postCategory}
                         >
                           {uploading ? <Spinner /> : "Create"}
                         </button>

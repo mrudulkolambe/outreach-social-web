@@ -28,28 +28,120 @@ const HelpAndSupport = () => {
 		<RootLayout>
 			<div className='flex flex-col h-screen max-h-screen'>
 				<Topbar />
-				<div className='flex flex-col items-start py-3 px-10 w-full bg-white primary-height overflow-hidden'>
-					<h2 className='page-heading mb-2 text-black'>Help And Support</h2>
-					<p>We always ready to help you from Monday until Friday on <span className='underline underline-offset-2'>09.00 AM until 05.00 PM</span>. Contact us with this following contact:</p>
-					<form onSubmit={handleSubmit(onSubmit)} className='py-6 px-10 flex flex-col bg-accent/5 rounded-xl w-full mt-3 gap-3'>
-						<div>
-							<label htmlFor="name" className='label'>Name: </label>
-							<input type="text" className={twMerge('input', errors.name && "border-red-600")} id='name' {...register("name", { required: true })} />
+				<div className='flex-1 w-full bg-white overflow-hidden'>
+					<div className='h-full w-full overflow-y-auto px-4 sm:px-6 lg:px-10'>
+						<div className='py-6 sm:py-8 min-h-full'>
+							<h2 className='text-2xl sm:text-3xl font-bold text-black mb-3 sm:mb-4'>Help And Support</h2>
+							<p className='text-sm sm:text-base text-gray-700 max-w-2xl'>
+								We are always ready to help you from Monday until Friday, <span className='font-medium'>09:00 AM to 05:00 PM</span>. Contact us using the form below:
+							</p>
+							
+							<form onSubmit={handleSubmit(onSubmit)} className='w-full max-w-2xl mt-6 sm:mt-8 mb-8'>
+								<div className='bg-accent/5 rounded-xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6'>
+									<div>
+										<label htmlFor="name" className='block text-sm sm:text-base font-medium mb-1.5'>
+											Name <span className="text-red-500">*</span>
+										</label>
+										<input 
+											type="text" 
+											className={twMerge(
+												'input w-full text-sm sm:text-base transition-colors',
+												errors.name ? "border-red-500 focus:border-red-500" : "focus:border-accent"
+											)} 
+											id='name' 
+											placeholder='Enter your full name'
+											{...register("name", { required: true })} 
+										/>
+										{errors.name && (
+											<p className="mt-1 text-xs sm:text-sm text-red-500">Name is required</p>
+										)}
+									</div>
+
+									<div>
+										<label htmlFor="email" className='block text-sm sm:text-base font-medium mb-1.5'>
+											Email Address <span className="text-red-500">*</span>
+										</label>
+										<input 
+											type="email" 
+											className={twMerge(
+												'input w-full text-sm sm:text-base transition-colors',
+												errors.email ? "border-red-500 focus:border-red-500" : "focus:border-accent"
+											)} 
+											id='email' 
+											placeholder='Enter your email address'
+											{...register("email", { 
+												required: true,
+												pattern: {
+													value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+													message: "Invalid email address"
+												}
+											})} 
+										/>
+										{errors.email && (
+											<p className="mt-1 text-xs sm:text-sm text-red-500">
+												{errors.email.type === 'pattern' ? 'Invalid email address' : 'Email is required'}
+											</p>
+										)}
+									</div>
+
+									<div>
+										<label htmlFor="contact" className='block text-sm sm:text-base font-medium mb-1.5'>
+											Contact Number <span className="text-red-500">*</span>
+										</label>
+										<input 
+											type="tel" 
+											className={twMerge(
+												'input w-full text-sm sm:text-base transition-colors',
+												errors.contact ? "border-red-500 focus:border-red-500" : "focus:border-accent"
+											)} 
+											id="contact"
+											placeholder='Enter your contact number'
+											{...register("contact", { 
+												required: true,
+												pattern: {
+													value: /^[0-9+-]+$/,
+													message: "Invalid phone number"
+												}
+											})} 
+										/>
+										{errors.contact && (
+											<p className="mt-1 text-xs sm:text-sm text-red-500">
+												{errors.contact.type === 'pattern' ? 'Invalid phone number' : 'Contact number is required'}
+											</p>
+										)}
+									</div>
+
+									<div>
+										<label htmlFor="message" className='block text-sm sm:text-base font-medium mb-1.5'>
+											Message <span className="text-red-500">*</span>
+										</label>
+										<textarea 
+											className={twMerge(
+												'input w-full h-24 sm:h-36 resize-none text-sm sm:text-base transition-colors',
+												errors.message ? "border-red-500 focus:border-red-500" : "focus:border-accent"
+											)} 
+											id='message'
+											placeholder='Write your message here...'
+											{...register("message", { required: true })}
+										></textarea>
+										{errors.message && (
+											<p className="mt-1 text-xs sm:text-sm text-red-500">Message is required</p>
+										)}
+									</div>
+
+									<div className='pt-2 sm:pt-4'>
+										<button 
+											type='submit' 
+											disabled={isFormLoading}
+											className='button w-full sm:w-auto min-w-[120px] px-6 py-2.5 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed transition-all'
+										>
+											{isFormLoading ? <Spinner /> : "Submit Request"}
+										</button>
+									</div>
+								</div>
+							</form>
 						</div>
-						<div>
-							<label htmlFor="email" className='label'>Email address: </label>
-							<input type="email" className={twMerge('input', errors.email && "border-red-600")} id='email' {...register("email", { required: true })} />
-						</div>
-						<div>
-							<label htmlFor="contact" className='label'>Contact number: </label>
-							<input type="text" className={twMerge('input', errors.contact && "border-red-600")} id="contact" {...register("contact", { required: true })} />
-						</div>
-						<div>
-							<label htmlFor="message" className='label'>Message: </label>
-							<textarea className={twMerge('input h-36 resize-none', errors.message && "border-red-600")} id='message' {...register("message", { required: true })}  ></textarea>
-						</div>
-						<button type='submit' className='button'>{isFormLoading ? <Spinner /> : "Submit"}</button>
-					</form>
+					</div>
 				</div>
 			</div>
 		</RootLayout>

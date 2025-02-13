@@ -155,7 +155,7 @@ const Sidebar = ({
 
   return (
     <>
-      <aside className={twMerge(' h-screen', collapsed ? "w-max" : "w-[20vw]")}>
+      <aside className={twMerge('hidden md:block h-screen', collapsed ? "w-max" : "w-[20vw]")}>
         <div className='flex items-center px-9 h-[80px] w-full'>
           <Link to={"/"}><img src={"/assets/logo/logo.svg"} alt="" /></Link>
         </div>
@@ -191,10 +191,72 @@ const Sidebar = ({
           }}>{"Logout"}</span>
         </nav>
       </aside>
-      {postDialog && <div className='fixed h-screen w-screen bg-black/50 z-20 top-0 left-0 flex items-center justify-center'>
-        <form className='w-[56vw] h-[65vh] bg-white rounded-xl py-5 px-8'>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-50">
+        <div className="flex items-center justify-around px-2 py-3">
+          {routes.map((route) => {
+            if (route.action === "link") {
+              return (
+                <Link
+                  key={route.url}
+                  to={route.url}
+                  className={twMerge(
+                    'flex flex-col items-center gap-1',
+                    pathname === route.url ? "text-accent" : "text-gray-500"
+                  )}
+                >
+                  {route.icon}
+                  <span className="text-xs">{route.label}</span>
+                </Link>
+              );
+            } else if (route.action === "button") {
+              return (
+                <button
+                  key={route.url}
+                  onClick={() => setPostDialog(true)}
+                  className={twMerge(
+                    'flex flex-col items-center gap-1',
+                    pathname === route.url ? "text-accent" : "text-gray-500"
+                  )}
+                >
+                  {route.icon}
+                  <span className="text-xs">{route.label}</span>
+                </button>
+              );
+            }
+          })}
+          <DropdownMenu open={settingsOpen} onOpenChange={(e) => setSettingsOpen(e)}>
+            <DropdownMenuTrigger className="flex flex-col items-center gap-1 text-gray-500">
+              {settingsDropdown.icon}
+              <span className="text-xs">{settingsDropdown.label}</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="mb-2 p-2 w-48">
+              <DropdownMenuItem className="w-full py-2">Terms & Conditions</DropdownMenuItem>
+              <DropdownMenuItem className="w-full py-2">Privacy Policy</DropdownMenuItem>
+              <Link to={"/help-and-support"}>
+                <DropdownMenuItem className="w-full py-2">Help & Support</DropdownMenuItem>
+              </Link>
+              <DropdownMenuItem 
+                className="w-full py-2 text-red-500"
+                onClick={() => {
+                  signOut(auth).catch((error) => {
+                    console.log(error)
+                  });
+                }}
+              >
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </nav>
+
+      {/* Post Dialog */}
+      {postDialog && <div className='fixed h-screen w-screen bg-black/50 z-50 top-0 left-0 flex items-center justify-center px-4'>
+        <form className='w-full max-w-[600px] h-[65vh] bg-white rounded-xl py-5 px-4 sm:px-8'>
           <div className='flex items-center justify-between'>
-            <h1 className='text-2xl font-bold'>Share your post</h1>
+            <h1 className='text-xl sm:text-2xl font-bold'>Share your post</h1>
             <span onClick={() => setPostDialog(false)} className='h-6 w-6 rounded-md bg-accent/10 flex items-center justify-center hover:bg-accent/20 duration-100 cursor-pointer'>
               <IoClose />
             </span>
@@ -211,7 +273,7 @@ const Sidebar = ({
             </div>
           </div>
 
-          <div className="relative h-[55%]">
+          <div className="relative h-[200px]">
             <textarea value={content} ref={textAreaRef} onChange={(e) => handleInputChange(e.target.value)} className="bg-accent/5 px-4 py-2 rounded-lg resize-none scrollbar outline-none border-0 flex-1 mt-3 w-full h-full" placeholder="What's on your mind?"></textarea>
             {showSuggestions && (
               <div

@@ -4,7 +4,6 @@ import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import Button from '../../../components/Button';
-import PostCard from '../../../components/PostCard';
 import RootLayout from '../layout';
 import { useAuthContext } from '../../../context/Auth';
 import Topbar from '@/components/Topbar';
@@ -18,6 +17,7 @@ import moment from 'moment';
 import Storycard from '@/components/Storycard';
 import { useNavigate, useParams } from 'react-router-dom';
 import { followUser, getUserByID } from '@/service/authService';
+import Postcard from '@/components/post/Postcard';
 
 const Profile = () => {
   const { user, baseUser } = useAuthContext()
@@ -125,7 +125,7 @@ const Profile = () => {
   return (
     <RootLayout loading={loading}>
       <Dialog open={storyOpen.show} onOpenChange={(e) => setStoryOpen({ ...storyOpen, show: e })}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:w-[80vw] md:w-[60vw] lg:w-[50vw] max-w-4xl">
           <Stories
             storyContainerStyles={{
               background: "#000",
@@ -141,54 +141,73 @@ const Profile = () => {
             stories={storyOpen.stories || []}
             defaultInterval={8000}
             width={"100%"}
-            height={768}
+            height={window.innerWidth < 768 ? window.innerHeight : 768}
           />
         </DialogContent>
       </Dialog>
       <div className='flex flex-col'>
         <Topbar />
         <div className='flex primary-height bg-[#FAFAFA]'>
-          <div className='w-[80vw] px-10 py-5 overflow-y-auto scrollbar'>
-            <div className='flex items-center justify-between'>
-              <div className='w-1/3'>
+          <div className='w-full lg:w-[80vw] px-4 sm:px-6 lg:px-10 py-4 sm:py-5 overflow-y-auto scrollbar'>
+            <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 sm:gap-4'>
+              <div className='w-full sm:w-1/3'>
                 <img className='h-[80px] w-[80px] rounded-full object-cover' src={searchedUser?.imageUrl} alt="" />
               </div>
-              <div className='w-1/3 grid grid-cols-3 gap-4'>
-                <div className='text-xl flex flex-col items-center justify-center'>
+              <div className='w-full sm:w-1/3 grid grid-cols-3 gap-2 sm:gap-4'>
+                <div className='text-base sm:text-xl flex flex-col items-center justify-center'>
                   <h3 className='font-bold'>{searchedUser?.feedCount || 0}</h3>
                   <p className='font-semibold'>Posts</p>
                 </div>
-                <div className='text-xl flex flex-col items-center justify-center'>
+                <div className='text-base sm:text-xl flex flex-col items-center justify-center'>
                   <h3 className='font-bold'>{searchedUser?.followers || 0}</h3>
                   <p className='font-semibold'>Followers</p>
                 </div>
-                <div className='text-xl flex flex-col items-center justify-center'>
+                <div className='text-base sm:text-xl flex flex-col items-center justify-center'>
                   <h3 className='font-bold'>{searchedUser?.following || 0}</h3>
                   <p className='font-semibold'>Following</p>
                 </div>
               </div>
 
-               <div className={params._id  ? 'opacity-100 w-1/3 flex justify-end' : 'opacity-100 w-1/3'}>
-                <span onClick={followUserFunction}>
-                  <Button disabled={false} text={!searchedUser?.isFollowing ? 'Follow' : "Unfollow"} type='button' loading={false} className='w-max py-2 h-max' />
+              <div className={params._id ? 'w-full sm:w-1/3 flex sm:justify-end' : 'opacity-0 w-full sm:w-1/3 pointer-events-none'}>
+                <span onClick={followUserFunction} className="w-full sm:w-auto">
+                  <Button disabled={false} text={!searchedUser?.isFollowing ? 'Follow' : "Unfollow"} type='button' loading={false} className='w-full sm:w-max py-2 h-max' />
                 </span>
               </div>
             </div>
 
-            <div className='flex flex-col mt-2'>
-              <h1 className='text-xl font-bold'>{searchedUser?.name}</h1>
+            <div className='flex flex-col mt-4 sm:mt-2'>
+              <h1 className='text-lg sm:text-xl font-bold'>{searchedUser?.name}</h1>
               <span className='mt-1 px-3 py-0.5 rounded-full bg-accent/20 w-max'>@{searchedUser?.username}</span>
-              <p className='mt-2 max-w-[60%]'>{searchedUser?.bio}</p>
+              <p className='mt-2 max-w-full sm:max-w-[60%]'>{searchedUser?.bio}</p>
             </div>
 
-            <div className={params._id ? "hidden" : 'mt-5'}>
-              <h2 className='text-xl font-semibold'>Stories</h2>
+            <div className={params._id ? "hidden" : 'mt-4 sm:mt-5 hidden'}>
+              <h2 className='text-lg sm:text-xl font-semibold'>Stories</h2>
               <div className='mt-3'>
                 <Swiper
                   freeMode={true}
                   className='w-full'
                   grabCursor
-                  spaceBetween={20}
+                  spaceBetween={10}
+                  slidesPerView="auto"
+                  breakpoints={{
+                    320: {
+                      slidesPerView: 3,
+                      spaceBetween: 8
+                    },
+                    640: {
+                      slidesPerView: 5,
+                      spaceBetween: 12
+                    },
+                    768: {
+                      slidesPerView: 6,
+                      spaceBetween: 16
+                    },
+                    1024: {
+                      slidesPerView: 8,
+                      spaceBetween: 20
+                    }
+                  }}
                 >
                   {stories.own && <SwiperSlide className='storycard-layout'>
                     <div onClick={() => {
@@ -242,71 +261,77 @@ const Profile = () => {
               </div>
             </div>
 
-            <div className={'mt-5'}>
-              <h2 className='text-xl font-semibold'>Reward Points</h2>
-              <div className='mt-3'>
+            <div className={'mt-4 sm:mt-5'}>
+              <h2 className='text-lg sm:text-xl font-semibold mb-4'>Reward Points</h2>
+              <div className='mt-2 sm:mt-3'>
                 <h3>Reward Points: {searchedUser?.rewardPoints}</h3>
               </div>
             </div>
 
-            <div className='mt-5'>
-              <h2 className='text-xl font-semibold'>Interest</h2>
-              <div className='mt-3 flex flex-wrap gap-3'>
+            <div className='mt-4 sm:mt-5'>
+              <h2 className='text-lg sm:text-xl font-semibold'>Interest</h2>
+              <div className='mt-2 sm:mt-3 flex flex-wrap gap-2 sm:gap-3'>
                 {
                   interests.map((interest) => {
-                    return <div className={twMerge("w-max cursor-pointer border-2 hover:bg-black/5 duration-150 h-max px-3 py-2 bg-white shadow-lg rounded-full text-sm flex items-center justify-center gap-1", "border-accent")}><img className="h-6 w-6 object-fill" src={interest.icon} alt={interest.interest} />{interest.interest}</div>
+                    return <div key={interest.interest} className={twMerge("w-max cursor-pointer border-2 hover:bg-black/5 duration-150 h-max px-2 sm:px-3 py-1.5 sm:py-2 bg-white shadow-lg rounded-full text-sm flex items-center justify-center gap-1", "border-accent")}><img className="h-5 sm:h-6 w-5 sm:w-6 object-fill" src={interest.icon} alt={interest.interest} />{interest.interest}</div>
                   })
                 }
               </div>
             </div>
 
-            <div className='mt-5 hidden'>
-              <h2 className='text-xl font-semibold'>Past post</h2>
-              <div className='mt-3 flex items-center relative'>
-                <div className='left-0 bg-white absolute z-30 top-1/2 prevEl cursor-pointer'>
-                  Prev
-                </div>
-                <div className='right-0 bg-white absolute z-30 top-1/2 nextEl cursor-pointer'>
-                  icon
-                </div>
-                <Swiper
-                  modules={[Navigation, Pagination]}
-                  navigation={
-                    {
+            <div className='mt-4 sm:mt-5'>
+              <h2 className='text-lg sm:text-xl font-semibold mb-4'>Past Posts</h2>
+              <div className='relative'>
+                <div className='hidden lg:block'>
+                  <div className='absolute left-0 top-1/2 -translate-y-1/2 z-30 prevEl cursor-pointer bg-white shadow-lg rounded-r-lg p-2 hover:bg-gray-50'>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </div>
+                  <div className='absolute right-0 top-1/2 -translate-y-1/2 z-30 nextEl cursor-pointer bg-white shadow-lg rounded-l-lg p-2 hover:bg-gray-50'>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                  <Swiper
+                    modules={[Navigation, Pagination]}
+                    navigation={{
                       nextEl: ".nextEl",
                       prevEl: ".prevEl"
-                    }
-                  }
-                  allowTouchMove={false}
-                  className='w-full'
-                  fadeEffect={{
-                    crossFade: true
-                  }}
-                  spaceBetween={20}
-                  slidesPerView={3}
-                >
-                  <SwiperSlide>
-                    <PostCard />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <PostCard />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <PostCard />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <PostCard />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <PostCard />
-                  </SwiperSlide>
-                </Swiper>
+                    }}
+                    pagination={{ clickable: true }}
+                    allowTouchMove={true}
+                    className='w-full px-2'
+                    spaceBetween={24}
+                    slidesPerView={3}
+                    breakpoints={{
+                      1024: { slidesPerView: 2, spaceBetween: 20 },
+                      1280: { slidesPerView: 3, spaceBetween: 24 }
+                    }}
+                  >
+                    {baseUser?.feeds.map((post) => (
+                      <SwiperSlide key={post._id} className='pb-10'>
+                        <div className='bg-white rounded-xl shadow-sm'>
+                          <Postcard post={post} />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
+                
+                {/* Mobile/Tablet View */}
+                <div className='lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6'>
+                  {baseUser?.feeds.map((post) => (
+                    <div key={post._id} className='bg-white rounded-xl shadow-sm'>
+                      <Postcard post={post} />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-
           </div>
         </div>
-      </div >
+      </div>
     </RootLayout>
   )
 }

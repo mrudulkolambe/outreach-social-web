@@ -373,64 +373,105 @@ const Postcard = memo(({ post }: { post: Post }) => {
 								<span className='flex gap-1 items-center text-lg'><GoComment className='text-gray-500 text-2xl' /> {post.commentCount}</span>
 							</DialogTrigger>
 							<DialogTitle className='hidden'>POST by {post.user.username}</DialogTitle>
-							<DialogContent className="border-0 flex w-[80vw] h-[90vh] p-0 gap-0 overflow-hidden">
-								<div className='w-3/5 h-full'>
-									<div className='relative h-full' onDoubleClick={handleLike}>
-										{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 left-1 -translate-y-1/2 p-0.5 cursor-pointer", `prev_${post._id}`)}><ChevronLeft className="text-sm" /></span>}
+							<DialogContent className="border-0 flex flex-col lg:flex-row w-[95vw] lg:w-[80vw] h-[90vh] p-0 gap-0 overflow-hidden bg-white">
+								<div className='w-full lg:w-3/5 h-[45vh] lg:h-full bg-black flex items-center'>
+									<div className='relative h-full w-full' onDoubleClick={handleLike}>
+										{post.media.length > 1 && (
+											<span className={twMerge("z-[5] h-8 w-8 sm:h-6 sm:w-6 rounded-full bg-white/90 flex items-center justify-center absolute top-1/2 left-2 -translate-y-1/2 p-0.5 cursor-pointer shadow-lg", `prev_${post._id}`)}>
+												<ChevronLeft className="text-lg sm:text-sm" />
+											</span>
+										)}
 										<Swiper
 											modules={[Navigation, Pagination]}
 											className='w-full h-full'
 											grabCursor
-											spaceBetween={40}
-											pagination
-											navigation={
-												{
-													nextEl: `.next_${post._id}`,
-													prevEl: `.prev_${post._id}`
-												}
-											}
+											spaceBetween={0}
+											pagination={{ clickable: true }}
+											navigation={{
+												nextEl: `.next_${post._id}`,
+												prevEl: `.prev_${post._id}`
+											}}
 											slidesPerView={1}
 										>
-											{
-												post.media.map((media) => {
-													return <SwiperSlide key={media.url} className='h-full'>
-														{
-															media.type == "video" ? <VideoComponent isPopup={true} videoUrl={media.url} /> : <img className={'w-full h-full object-cover'} src={media.url} alt="" />
-														}
-													</SwiperSlide>
-												})
-											}
+											{post.media.map((media) => (
+												<SwiperSlide key={media.url} className='h-full flex items-center justify-center'>
+													{media.type == "video" ? 
+														<VideoComponent isPopup={true} videoUrl={media.url} /> : 
+														<img className='w-full h-full object-contain' src={media.url} alt="" />
+													}
+												</SwiperSlide>
+											))}
 										</Swiper>
-										{post.media.length > 1 && <span className={twMerge("z-[5] h-6 w-6 rounded-full bg-white flex items-center justify-center absolute top-1/2 right-1 -translate-y-1/2 p-0.5 cursor-pointer", `next_${post._id}`)}><ChevronRight /></span>}
+										{post.media.length > 1 && (
+											<span className={twMerge("z-[5] h-8 w-8 sm:h-6 sm:w-6 rounded-full bg-white/90 flex items-center justify-center absolute top-1/2 right-2 -translate-y-1/2 p-0.5 cursor-pointer shadow-lg", `next_${post._id}`)}>
+												<ChevronRight className="text-lg sm:text-sm" />
+											</span>
+										)}
 									</div>
 								</div>
-								<div className='w-2/5 h-[90vh] flex flex-col'>
-									<div className='flex items-center w-full h-16 px-4 border-b border-black/10'>
+								<div className='w-full lg:w-2/5 h-[45vh] lg:h-[90vh] flex flex-col bg-white'>
+									<div className='flex items-center w-full h-14 sm:h-16 px-4 border-b border-black/10'>
 										<div className='flex gap-2 items-center'>
-											{post.user.imageUrl ? <img src={post.user.imageUrl} className='h-10 w-10 rounded-full' alt="" /> : <Avatar name={post.user.name} round size='40' color='#1b57bf' />}
-											<h2 className='font-semibold text-black text-lg'>@{post.user.username}</h2>
+											{post.user.imageUrl ? 
+												<img src={post.user.imageUrl} className='h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover' alt={post.user.name} /> : 
+												<Avatar name={post.user.name} round size='32' color='#1b57bf' />
+											}
+											<div className='flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2'>
+												<h2 className='font-semibold text-black text-sm sm:text-base'>{post.user.name}</h2>
+												<p className='text-gray-500 text-xs sm:text-sm'>@{post.user.username}</p>
+											</div>
 										</div>
 									</div>
-									<div className='px-4 py-3 flex-1 w-full gap-y-4 flex-col flex overflow-auto scrollbar'>
+									<div className='px-4 py-3 flex-1 w-full gap-y-4 flex-col flex overflow-y-auto scrollbar'>
 										<ContentDisplay user={post.user} text={post.content} timestamp={post.createdAt} comments={[]} />
-										{
-											commentsLoading ? <p className='text-sm'>Loading...</p> : comments?.response?.filter((comment: FeedComment) => {
-												return comment.parentID == null || comment.parentID == undefined || comment.parentID == ""
-											}).map((comment: FeedComment) => {
-												return <ContentDisplay text={comment.text} timestamp={comment.createdAt} user={comment.author} comments={comments.response.filter((nestedComment) => {
-													return nestedComment.parentID === comment._id;
-												})} />
-											})
-										}
+										{commentsLoading ? (
+											<div className='flex items-center justify-center py-4'>
+												<p className='text-sm text-gray-500'>Loading comments...</p>
+											</div>
+										) : comments?.response?.length === 0 ? (
+											<div className='flex items-center justify-center py-4'>
+												<p className='text-sm text-gray-500'>No comments yet</p>
+											</div>
+										) : (
+											comments?.response
+												?.filter((comment: FeedComment) => !comment.parentID)
+												.map((comment: FeedComment) => (
+													<ContentDisplay 
+														key={comment._id}
+														text={comment.text} 
+														timestamp={comment.createdAt} 
+														user={comment.author} 
+														comments={comments.response.filter((nestedComment) => nestedComment.parentID === comment._id)} 
+													/>
+												))
+										)}
 									</div>
-									<div className=' pt-3 h-32 w-full border-t-2 border-black/20 flex flex-col justify-between'>
-										<div className='flex flex-col'>
-											<span onClick={handleLike} className='px-6 scale-105 cursor-pointer flex gap-1 items-center'>{liked.liked ? <GoHeartFill className='fill-red-600 text-gray-500 text-2xl' /> : <GoHeart className='text-gray-500 text-2xl' />} {liked.likeCount} likes</span>
-											<p className='px-6 text-xs font-semibold mt-2'>{moment(post.createdAt).fromNow()}</p>
+									<div className='pt-2 sm:pt-3 h-28 sm:h-32 w-full border-t border-black/10 flex flex-col justify-between bg-white'>
+										<div className='flex flex-col px-4'>
+											<span onClick={handleLike} className='scale-105 cursor-pointer flex gap-1.5 items-center text-sm sm:text-base'>
+												{liked.liked ? 
+													<GoHeartFill className='fill-red-600 text-gray-500 text-xl sm:text-2xl' /> : 
+													<GoHeart className='text-gray-500 text-xl sm:text-2xl' />
+												} 
+												{liked.likeCount} likes
+											</span>
+											<p className='text-xs text-gray-500 mt-1.5'>{moment(post.createdAt).fromNow()}</p>
 										</div>
-										<div className='pr-3 items-center mt-3 border-t-2 border-black/20 flex-1 flex relative'>
-											<input onChange={(e) => setCommentText(e.target.value)} value={commentText} type="text" className='flex-1 h-full input rounded-none border-0' placeholder='Comment here...' />
-											<button onClick={commentPost} disabled={postCommentLoading} className='disabled:bg-accent/50 bg-accent max-h-10 h-10 w-10 max-w-10 aspect-square rounded-full flex items-center justify-center text-white'><FaArrowUp className='text-white' /></button>
+										<div className='px-3 items-center mt-2 border-t border-black/10 flex-1 flex relative'>
+											<input 
+												onChange={(e) => setCommentText(e.target.value)} 
+												value={commentText} 
+												type="text" 
+												className='flex-1 h-full input rounded-none border-0 text-sm sm:text-base' 
+												placeholder='Add a comment...' 
+											/>
+											<button 
+												onClick={commentPost} 
+												disabled={postCommentLoading || !commentText.trim()}
+												className='disabled:bg-accent/50 bg-accent h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center text-white transition-colors'
+											>
+												<FaArrowUp className='w-3.5 h-3.5 sm:w-4 sm:h-4' />
+											</button>
 										</div>
 									</div>
 								</div>
