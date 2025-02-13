@@ -33,16 +33,26 @@ export default function Bio() {
       <main className="screen flex items-start justify-between flex-col md:flex-row px-4 md:px-0">
         <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} className="mb-6 md:mb-0" />
         <form onSubmit={handleSubmit} className="w-full md:w-[33%] border border-accent/20 h-full px-6 md:px-12 py-8 md:py-10 flex flex-col justify-between">
-          <div>
-            <div className="flex justify-between">
-              <h1 className="primary-heading text-accent text-3xl md:text-4xl">Share your bio with us</h1>
-              <TextButton text="Skip" className="text-button" type="button" />
+          <div className="flex-1">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <h1 className="primary-heading text-accent text-2xl md:text-4xl leading-tight">Share your bio <br className="hidden md:block" />with us</h1>
+                <p className="font-medium mt-2 md:mt-3 text-sm md:text-base text-gray-600">Tell us about yourself, your interests, and what makes you unique...</p>
+              </div>
+              <TextButton text="Skip" onClick={() => navigate("/interest")} className="text-button text-sm md:text-base" type="button" />
             </div>
-            <p className="font-medium mt-3 mb-5 text-sm md:text-base">Write about you...</p>
-            <Input onChange={(e) => setBio(e.target.value)} value={bio} textarea={true} placeholder="Write your Bio" id="bio" type="text" />
-            {/* <Input register={register('password', { required: 'Password is required' })} onChange={() => { }} value="" textarea={true} placeholder="Write your Bio" id="bio" type="text" /> */}
+            <div className="mt-6 md:mt-8">
+              <Input 
+                onChange={(e) => setBio(e.target.value)} 
+                value={bio} 
+                textarea={true} 
+                placeholder="Write your Bio" 
+                id="bio" 
+                type="text"
+              />
+            </div>
           </div>
-          <Button text="Proceed" loading={loading} disabled={false} type="submit" className="" />
+          <Button text="Proceed" loading={loading} disabled={!bio.trim()} type="submit" className="mt-6 md:mt-8" />
         </form>
         <img width={66} className="opacity-0 select-none pointer-events-none hidden md:block" src={images.logo} alt={"outreach-logo"} />
       </main>
