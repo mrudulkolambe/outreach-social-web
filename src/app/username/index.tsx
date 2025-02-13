@@ -34,12 +34,12 @@ export default function Username() {
   };
   return (
     <>
-      <main className="screen flex items-start justify-between">
-        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} />
-        <form onSubmit={handleSubmit(onSubmit)} className="w-[33%] border border-accent/20 h-full px-12 py-10 flex flex-col justify-between">
+      <main className="screen flex items-start justify-between flex-col md:flex-row px-4 md:px-0">
+        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} className="mb-6 md:mb-0" />
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full md:w-[33%] border border-accent/20 h-full px-6 md:px-12 py-8 md:py-10 flex flex-col justify-between">
           <div>
-            <h1 className="primary-heading text-accent">Tell us name & Create<br />Username</h1>
-            <p className="font-medium mt-3">We're thrilled to have you onboard</p>
+            <h1 className="primary-heading text-accent text-3xl md:text-4xl">Tell us name & Create<br />Username</h1>
+            <p className="font-medium mt-3 text-sm md:text-base">We're thrilled to have you onboard</p>
           </div>
           <div className="mt-6 flex flex-col gap-6 flex-1">
             <Input
@@ -61,11 +61,11 @@ export default function Username() {
               error={errors.username}
               type="text"
             />
-            <p>*User names must be 6-20 characters long, no uppercase, numbers, and underscores.</p>
+            <p className="text-xs md:text-sm">*User names must be 6-20 characters long, no uppercase, numbers, and underscores.</p>
           </div>
           <Button text="Continue" loading={isSubmitting} disabled={false} type="submit" className="" />
         </form>
-        <img width={66} className="opacity-0 select-none pointer-events-none" src={images.logo} alt={"outreach-logo"} />
+        <img width={66} className="opacity-0 select-none pointer-events-none hidden md:block" src={images.logo} alt={"outreach-logo"} />
       </main>
     </>
   );

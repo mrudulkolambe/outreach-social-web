@@ -39,20 +39,20 @@ export default function Interest() {
 
   return (
     <>
-      <main className="screen flex items-start justify-between">
-        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} />
-        <form onSubmit={handleSubmit} className="w-[33%] border border-accent/20 h-full px-12 py-10 flex flex-col justify-between">
-          <h1 className="primary-heading text-accent">Tell us what you're <br />interested in </h1>
+      <main className="screen flex items-start justify-between flex-col md:flex-row px-4 md:px-0">
+        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} className="mb-6 md:mb-0" />
+        <form onSubmit={handleSubmit} className="w-full md:w-[33%] border border-accent/20 h-full px-6 md:px-12 py-8 md:py-10 flex flex-col justify-between">
+          <h1 className="primary-heading text-accent text-3xl md:text-4xl">Tell us what you're <br />interested in </h1>
           <div className="flex flex-1 mt-6">
-            <div className="w-full h-max flex flex-wrap gap-3">
+            <div className="w-full h-max flex flex-wrap gap-2 md:gap-3">
               {interestsOptions.map((interest) => {
-                return <div onClick={() => toggleItemInList(interest.interest)} className={twMerge("cursor-pointer border-2 hover:bg-black/5 duration-150 h-max px-3 py-2 bg-white shadow-lg rounded-full text-sm flex items-center justify-center gap-1", selectedInterest.indexOf(interest.interest) === -1 ? "border-black/5" : "border-accent")}><img className="h-6 w-6 object-fill" src={interest.icon} alt={interest.interest} />{interest.interest}</div>
+                return <div onClick={() => toggleItemInList(interest.interest)} className={twMerge("cursor-pointer border-2 hover:bg-black/5 duration-150 h-max px-2 md:px-3 py-1.5 md:py-2 bg-white shadow-lg rounded-full text-xs md:text-sm flex items-center justify-center gap-1", selectedInterest.indexOf(interest.interest) === -1 ? "border-black/5" : "border-accent")}><img className="h-5 w-5 md:h-6 md:w-6 object-fill" src={interest.icon} alt={interest.interest} />{interest.interest}</div>
               })}
             </div>
           </div>
           <Button text="Proceed" loading={loading} disabled={false} type="submit" className="" />
         </form>
-        <img width={66} className="opacity-0 select-none pointer-events-none" src={images.logo} alt={"outreach-logo"} />
+        <img width={66} className="opacity-0 select-none pointer-events-none hidden md:block" src={images.logo} alt={"outreach-logo"} />
       </main>
     </>
   );

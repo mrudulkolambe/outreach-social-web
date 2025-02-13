@@ -46,28 +46,28 @@ export default function ProfilePhoto() {
   }
   return (
     <>
-      <main className="screen flex items-start justify-between">
-        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} />
-        <form onSubmit={handleUpload} className="w-[33%] border border-accent/20 h-full px-12 py-10 flex flex-col justify-between">
+      <main className="screen flex items-start justify-between flex-col md:flex-row px-4 md:px-0">
+        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} className="mb-6 md:mb-0" />
+        <form onSubmit={handleUpload} className="w-full md:w-[33%] border border-accent/20 h-full px-6 md:px-12 py-8 md:py-10 flex flex-col justify-between">
           <div className="flex justify-between">
             <div className="flex-1 flex-col">
-              <h1 className="primary-heading text-accent">Great! Let's add your <br />profile picture</h1>
-              <p className="font-medium mt-3">Choose a photo for your profile picture</p>
+              <h1 className="primary-heading text-accent text-3xl md:text-4xl">Great! Let's add your <br />profile picture</h1>
+              <p className="font-medium mt-3 text-sm md:text-base">Choose a photo for your profile picture</p>
             </div>
             <Link to={"/bio"}><TextButton text="Skip" className="text-button" type="button" /></Link>
           </div>
           <div className="flex items-center justify-center relative">
-            <div className="cursor-pointer h-[230px] w-[230px] overflow-hidden bg-gray-300 rounded-full flex items-center justify-center">
+            <div className="cursor-pointer h-[180px] w-[180px] md:h-[230px] md:w-[230px] overflow-hidden bg-gray-300 rounded-full flex items-center justify-center">
               <img onClick={() => inputRef.current?.click()} src={fileSource || "/assets/icons/user.svg"} className="h-full w-full object-cover" alt="" />
             </div>
             <input ref={inputRef} type="file" accept=".png,.jpg,.jpeg" onChange={handleFileChange} className="hidden" />
-            <button type="button" onClick={() => inputRef.current?.click()} className="absolute -bottom-5 bg-accent h-12 w-12 rounded-full flex items-center justify-center">
-              <FaPlus className="text-white text-xl" />
+            <button type="button" onClick={() => inputRef.current?.click()} className="absolute -bottom-5 bg-accent h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center">
+              <FaPlus className="text-white text-lg md:text-xl" />
             </button>
           </div>
           <Button text="Proceed" loading={loading} disabled={false} type="submit" className="" />
         </form>
-        <img width={66} className="opacity-0 select-none pointer-events-none" src={images.logo} alt={"outreach-logo"} />
+        <img width={66} className="opacity-0 select-none pointer-events-none hidden md:block" src={images.logo} alt={"outreach-logo"} />
       </main>
     </>
   );

@@ -60,12 +60,12 @@ export default function Login() {
   }
   return (
     <>
-      <main className="screen flex items-start justify-between">
-        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} />
-        <form onSubmit={handleSubmit(onSubmit)} className="w-[33%] border border-accent/20 h-full px-12 py-10 flex flex-col justify-between">
+      <main className="screen flex items-start justify-between flex-col md:flex-row px-4 md:px-0">
+        <img src={"/assets/logo/logo.svg"} width={66} alt={"outreach-logo"} className="mb-6 md:mb-0" />
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full md:w-[33%] border border-accent/20 h-full px-6 md:px-12 py-8 md:py-10 flex flex-col justify-between">
           <div className="h-1/2">
-            <h1 className="primary-heading text-accent">Hey, <br />Welcome!</h1>
-            <p className="font-medium mt-3">To proceed, please enter your name & <br />password.</p>
+            <h1 className="primary-heading text-accent text-3xl md:text-4xl">Hey, <br />Welcome!</h1>
+            <p className="font-medium mt-3 text-sm md:text-base">To proceed, please enter your name & <br />password.</p>
             <div className="flex flex-col justify-between">
               <div className="">
                 <div className="mt-6 flex flex-col gap-6 ">
@@ -97,13 +97,13 @@ export default function Login() {
             <div></div>
 
             <div className="flex flex-col gap-6">
-              <div className="flex gap-3 items-center w-[80%] mx-auto">
+              <div className="flex gap-3 items-center w-full md:w-[80%] mx-auto">
                 <div className="flex-1 border-2 h-0"></div>
                 <p>OR</p>
                 <div className="flex-1 border-2 h-0"></div>
               </div>
 
-              <div className="flex justify-between w-[80%] mx-auto">
+              <div className="flex justify-between w-full md:w-[80%] mx-auto">
                 <FcGoogle onClick={googleLogin} className="cursor-pointer text-4xl" />
                 <SiFacebook className="text-3xl text-[#316FF6]" />
                 <SiApple className="text-3xl" />
@@ -117,7 +117,7 @@ export default function Login() {
 
           </div>
         </form>
-        <img width={66} className="opacity-0 select-none pointer-events-none" src={images.logo} alt={"outreach-logo"} />
+        <img width={66} className="opacity-0 select-none pointer-events-none hidden md:block" src={images.logo} alt={"outreach-logo"} />
       </main>
     </>
   );
