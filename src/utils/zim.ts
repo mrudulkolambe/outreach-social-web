@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ZIM } from 'zego-zim-web';
 import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 
-const appID = 1245279888; // Replace with your App ID from ZEGOCLOUD
+const appID = 147912635; // Replace with your App ID from ZEGOCLOUD
 ZIM.create({ appID });
 const zim = ZIM.getInstance();
 let zp: ReturnType<typeof ZegoUIKitPrebuilt.create> | null = null;
@@ -52,7 +52,7 @@ async function fetchToken(userId: string, payload = ''): Promise<string | null> 
       userId,
       payload,
       appId: appID,
-      secret: "8373e07a913fe3caaeca84ed4dc155ff",
+      secret: "c78e74b68e265c7265f144168e749b48",
     });
 
     if (response.data.success) {
